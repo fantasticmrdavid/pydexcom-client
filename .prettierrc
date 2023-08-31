@@ -1,0 +1,14 @@
+{
+  "plugins": ["prettier-plugin-packagejson"],
+  "semi": false,
+  "singleQuote": true,
+  "useTabs": false,
+  "importOrder": [
+    "(^react$|^react-dom(.*)$|^react-router-dom$)",
+    "<THIRD_PARTY_MODULES>",
+    "(^~(.*)$)",
+    "^[./]"
+  ],
+  "importOrderSeparation": true,
+  "importOrderSortSpecifiers": true
+}
