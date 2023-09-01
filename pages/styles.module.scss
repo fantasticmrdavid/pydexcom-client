@@ -1,9 +1,14 @@
 .container {
   display: flex;
+  justify-content: center;
+  align-items: center;
   flex-wrap: nowrap;
   width: 100vw;
   height: 100vh;
-  background-color: orange;
-  font-family: "orbitron";
-  font-size: 20em;
+  white-space: nowrap;
+}
+
+.display {
+  font-size: 20vw;
+  max-width: 100%;
 }

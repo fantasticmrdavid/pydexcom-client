@@ -655,6 +655,11 @@ chalk@^4.0.0:
   optionalDependencies:
     fsevents "~2.3.2"
 
+classnames@^2.2.6, classnames@^2.3.2:
+  version "2.3.2"
+  resolved "https://registry.yarnpkg.com/classnames/-/classnames-2.3.2.tgz#351d813bf0137fcc6a76a16b88208d2560a0d924"
+  integrity sha512-CSbhY4cFEJRe6/GQzIk5qXZ4Jeg5pcsP7b5peFSDpffpe1cqjASH/n9UTjBwOp6XpMSTwQ8Za2K5V02ueA7Tmw==
+
 client-only@0.0.1:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/client-only/-/client-only-0.0.1.tgz#38bba5d403c41ab150bff64a95c85013cf73bca1"
@@ -2323,6 +2328,13 @@ react-is@^16.13.1:
   version "16.13.1"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.13.1.tgz#789729a4dc36de2999dc156dd6c1d9c18cea56a4"
   integrity sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==
+
+react-split-flap-effect@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/react-split-flap-effect/-/react-split-flap-effect-1.0.0.tgz#31af95f10c381623c551f6e0b5ef1cd8a43fb73b"
+  integrity sha512-hXaaG3kVgVOC0OxVWp8DToMO5PI55fkypcQ2NDzXHZocFn+u10aHAKpoGSUK+FHcnSStkvGfhoIBs1Rfr9p/bg==
+  dependencies:
+    classnames "^2.2.6"
 
 react@18.2.0:
   version "18.2.0"
