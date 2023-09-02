@@ -6,6 +6,7 @@ export const getReadings = async (
   req: NextApiRequest,
   res: NextApiResponse,
 ) => {
+  console.log("REQ: ", `${DEXCOM_SERVER_URL}/reading`)
   const results = await axios.get(`${DEXCOM_SERVER_URL}/reading`)
   return res.status(200).json(results.data)
 }
