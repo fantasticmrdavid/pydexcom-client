@@ -26,7 +26,7 @@ export default function Home() {
       <FlapDisplay
         className={styles.display}
         chars={Presets.ALPHANUM + ".↗↘→↓↑⇈⇊"}
-        value={`${parseInt(reading.mmol_l).toFixed(1)}${reading.trend_arrow}`}
+        value={`${parseFloat(reading.mmol_l).toFixed(1)}${reading.trend_arrow}`}
         length={5}
         padMode={"start"}
       />
