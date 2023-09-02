@@ -21,13 +21,19 @@ export default function Home() {
     [styles.container]: true,
   })
 
+const displayClassNames = classNames({
+    [styles.display]: true,
+    [styles.display4]: reading.mmol_l < 10,
+    [styles.display5]: reading.mmol_l >= 10,
+})
+
   return (
     <div className={counterClassNames}>
       <FlapDisplay
-        className={styles.display}
+        className={displayClassNames}
         chars={Presets.ALPHANUM + ".↗↘→↓↑⇈⇊"}
         value={`${parseFloat(reading.mmol_l).toFixed(1)}${reading.trend_arrow}`}
-        length={5}
+        length={reading.mmol_l >= 10 ? 5 : 4}
         padMode={"start"}
       />
     </div>
