@@ -7,6 +7,20 @@
   height: 100vh;
   white-space: nowrap;
   box-sizing: border-box;
+  font-size: 3em;
+  font-weight: 700;
+}
+
+.bg_green {
+  background-color: greenyellow;
+}
+
+.bg_purple {
+  background-color: #68c4eeab;
+}
+
+.bg_orange {
+  background-color: orange;
 }
 
 .display {
@@ -14,9 +28,9 @@
 }
 
 .display4 {
-  font-size: 25vw;
+  font-size: 39vw;
 }
 
 .display5 {
-  font-size: 19vw;
+  font-size: 36vw;
 }

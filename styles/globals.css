@@ -1,9 +1,11 @@
 html {
     margin: 0;
-    background-color: black;
-    color: white;
 }
 
 body {
     margin: 0;
+    font-family: "Roboto", 'Share', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }

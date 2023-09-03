@@ -51,10 +51,10 @@
   resolved "https://registry.yarnpkg.com/@eslint/js/-/js-8.48.0.tgz#642633964e217905436033a2bd08bf322849b7fb"
   integrity sha512-ZSjtmelB7IJfWD2Fvb7+Z+ChTIKWq6kjda95fLcQKNS5aheVHn4IkfgRQE3sIIzTcSLwLcLZUD9UBt+V7+h+Pw==
 
-"@fontsource/orbitron@^5.0.11":
-  version "5.0.11"
-  resolved "https://registry.yarnpkg.com/@fontsource/orbitron/-/orbitron-5.0.11.tgz#97f922802b9f5d0fb0d3e694f1cdc43705d5d37b"
-  integrity sha512-eVkWBgU/V6871Jq6F1VmjsHsM1rEBRnEDd1PYaqUbU5KA10QeKroLVPUMSt9Wafouhiur0yV7maY4xRA1DOFRw==
+"@fontsource/roboto@^5.0.8":
+  version "5.0.8"
+  resolved "https://registry.yarnpkg.com/@fontsource/roboto/-/roboto-5.0.8.tgz#613b477a56f21b5705db1a67e995c033ef317f76"
+  integrity sha512-XxPltXs5R31D6UZeLIV1td3wTXU3jzd3f2DLsXI8tytMGBkIsGcc9sIyiupRtA8y73HAhuSCeweOoBqf6DbWCA==
 
 "@humanwhocodes/config-array@^0.11.10":
   version "0.11.11"
@@ -655,7 +655,7 @@ chalk@^4.0.0:
   optionalDependencies:
     fsevents "~2.3.2"
 
-classnames@^2.2.6, classnames@^2.3.2:
+classnames@^2.3.2:
   version "2.3.2"
   resolved "https://registry.yarnpkg.com/classnames/-/classnames-2.3.2.tgz#351d813bf0137fcc6a76a16b88208d2560a0d924"
   integrity sha512-CSbhY4cFEJRe6/GQzIk5qXZ4Jeg5pcsP7b5peFSDpffpe1cqjASH/n9UTjBwOp6XpMSTwQ8Za2K5V02ueA7Tmw==
@@ -2328,13 +2328,6 @@ react-is@^16.13.1:
   version "16.13.1"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.13.1.tgz#789729a4dc36de2999dc156dd6c1d9c18cea56a4"
   integrity sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==
-
-react-split-flap-effect@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/react-split-flap-effect/-/react-split-flap-effect-1.0.0.tgz#31af95f10c381623c551f6e0b5ef1cd8a43fb73b"
-  integrity sha512-hXaaG3kVgVOC0OxVWp8DToMO5PI55fkypcQ2NDzXHZocFn+u10aHAKpoGSUK+FHcnSStkvGfhoIBs1Rfr9p/bg==
-  dependencies:
-    classnames "^2.2.6"
 
 react@18.2.0:
   version "18.2.0"
