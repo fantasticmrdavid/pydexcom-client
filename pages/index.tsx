@@ -3,7 +3,7 @@ import classNames from "classnames"
 import styles from "./styles.module.scss"
 
 export default function Home() {
-  const { data: reading, isLoading } = useQuery(
+  const { data, isLoading } = useQuery(
     ['getReadings'],
     async () =>
       await fetch(`/api/reading`).then((res) =>
@@ -14,7 +14,9 @@ export default function Home() {
       }
   )
 
-  if(isLoading || !reading) return <div className={styles.container}>loading...</div>
+  if(isLoading || !data) return <div className={styles.container}>loading...</div>
+
+    const {reading} = data
 
   const counterClassNames = classNames({
     [styles.container]: true,
