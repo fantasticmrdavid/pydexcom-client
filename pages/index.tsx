@@ -34,7 +34,7 @@ export default function Home() {
 
   useEffect(() => {
     if (data && reading.datetime !== lastFetch) addReading.mutate()
-  }, [data, lastFetch, reading?.datetime, addReading])
+  }, [])
 
   if (isLoading || !data)
     return <div className={styles.container}>loading...</div>
