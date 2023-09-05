@@ -14,7 +14,7 @@ export default function Home() {
     },
   )
 
-  const { reading } = data
+  const { reading } = data || {}
 
   const addReading = useMutation({
     mutationFn: () =>
@@ -35,7 +35,7 @@ export default function Home() {
   useEffect(() => {
     console.log(data, lastFetch)
     if (data && reading.datetime !== lastFetch) addReading.mutate()
-  }, [data])
+  }, [data, lastFetch, reading.datetime, addReading])
 
   if (isLoading || !data)
     return <div className={styles.container}>loading...</div>
