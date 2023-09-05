@@ -16,4 +16,6 @@ model readings {
   trend_arrow       String
   trend_description String
   datetime          DateTime
+
+  @@unique([datetime])
 }
