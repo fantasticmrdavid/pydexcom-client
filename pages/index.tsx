@@ -1,8 +1,27 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import classNames from 'classnames'
 import styles from './styles.module.scss'
-import { useEffect, useState } from 'react'
+import React, { ReactNode, useEffect, useState } from 'react'
 import axios from 'axios'
+import {
+  TbArrowDown,
+  TbArrowDownRight,
+  TbArrowRight,
+  TbArrowsDown,
+  TbArrowsUp,
+  TbArrowUp,
+  TbArrowUpRight,
+} from 'react-icons/tb'
+
+const arrowsToIcons: { [key: string]: ReactNode } = {
+  '↑↑': <TbArrowsUp />,
+  '↑': <TbArrowUp />,
+  '↗': <TbArrowUpRight />,
+  '→': <TbArrowRight />,
+  '↘': <TbArrowDownRight />,
+  '↓': <TbArrowDown />,
+  '↓↓': <TbArrowsDown />,
+}
 
 export default function Home() {
   const [lastFetch, setLastFetch] = useState()
@@ -56,7 +75,7 @@ export default function Home() {
     <div className={counterClassNames}>
       <div className={displayClassNames}>
         {parseFloat(reading.mmol_l).toFixed(1)}
-        {reading.trend_arrow}
+        {arrowsToIcons[reading.trend_arrow] || reading.trend_arrow}
       </div>
     </div>
   )
