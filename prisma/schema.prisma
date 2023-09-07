@@ -19,3 +19,26 @@ model readings {
 
   @@unique([datetime])
 }
+
+model Ingredient {
+  id                 Int    @id @default(autoincrement())
+  name               String
+  brand_vendor       String
+  protein            Float
+  fat                Float
+  carbohydrate       Float
+  sugar              Float
+  fibre              Float
+  avg_serving_units  Float?
+  avg_serving_weight Float?
+  Meal               Meal?  @relation(fields: [mealId], references: [id])
+  mealId             Int?
+
+  @@unique([name, brand_vendor])
+}
+
+model Meal {
+  id          Int          @id @default(autoincrement())
+  name        String
+  ingredients Ingredient[]
+}

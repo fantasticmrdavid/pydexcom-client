@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import classNames from 'classnames'
-import styles from './styles.module.scss'
+import styles from './readings/readings.module.scss'
 import React, { ReactNode, useEffect, useState } from 'react'
 import axios from 'axios'
 import {
