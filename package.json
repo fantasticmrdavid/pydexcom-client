@@ -2,6 +2,9 @@
   "name": "pydexcom-client",
   "version": "0.1.0",
   "private": true,
+  "browserslist": [
+    ">0.3%, defaults, supports es5"
+  ],
   "scripts": {
     "dev": "next dev",
     "prebuild": "npx prisma generate",
