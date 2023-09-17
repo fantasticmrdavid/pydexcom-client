@@ -32,8 +32,16 @@
 
 .display4 {
   font-size: 39vw;
+
+  @media screen and (max-height: 480px) {
+    font-size: 25vw;
+  }
 }
 
 .display5 {
   font-size: 33vw;
+
+  @media screen and (max-height: 480px) {
+    font-size: 25vw;
+  }
 }
