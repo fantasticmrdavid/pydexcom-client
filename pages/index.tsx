@@ -15,6 +15,12 @@ import {
 } from 'react-icons/tb'
 import { ReadingsChart } from '@/app/components/ReadingsChart/ReadingsChart'
 
+export type Reading = {
+  mmol_l: number
+  last_cgm_reading: string
+  trend_arrow: string
+}
+
 const OUTDATED_MINUTES = 5
 dayjs.extend(relativeTime)
 
@@ -86,7 +92,7 @@ export default function Home() {
               ...readings
                 .slice(0, 6)
                 .reverse()
-                .map((r) => [
+                .map((r: Reading) => [
                   dayjs(r.last_cgm_reading).format('H:mm'),
                   r.mmol_l,
                 ]),

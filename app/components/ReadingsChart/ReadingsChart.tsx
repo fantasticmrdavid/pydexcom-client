@@ -1,7 +1,13 @@
 import React from 'react'
 import { Chart } from 'react-google-charts'
 
-export const ReadingsChart = ({ data }) => {
+type ChartData = [string, string | number][]
+
+type Props = {
+  data: ChartData
+}
+
+export const ReadingsChart = ({ data }: Props) => {
   const options = {
     curveType: 'function',
     backgroundColor: 'transparent',
