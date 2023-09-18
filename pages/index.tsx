@@ -45,34 +45,36 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
-  const { reading } = data || {}
+  const { readings } = data || {}
 
   if (isLoading || !data)
     return <div className={styles.container}>loading...</div>
+  
+  const current = readings[0]
 
-  const lastUpdateMinutesAgo = dayjs().diff(dayjs(reading.last_cgm_reading), 'minutes')
+  const lastUpdateMinutesAgo = dayjs().diff(dayjs(current.last_cgm_reading), 'minutes')
 
   const counterClassNames = classNames({
     [styles.container]: true,
-    [styles.bg_green]: reading.mmol_l > 4 && reading.mmol_l < 10,
-    [styles.bg_orange]: reading.mmol_l >= 10,
-    [styles.bg_purple]: reading.mmol_l <= 4,
+    [styles.bg_green]: current.mmol_l > 4 && current.mmol_l < 10,
+    [styles.bg_orange]: current.mmol_l >= 10,
+    [styles.bg_purple]: current.mmol_l <= 4,
     [styles.bg_outdated]: lastUpdateMinutesAgo > OUTDATED_MINUTES
   })
 
   const displayClassNames = classNames({
     [styles.display]: true,
-    [styles.display4]: reading.mmol_l < 10,
-    [styles.display5]: reading.mmol_l >= 10,
+    [styles.display4]: current.mmol_l < 10,
+    [styles.display5]: current.mmol_l >= 10,
   })
 
   return (
     <div className={counterClassNames}>
       <div className={displayClassNames}>
-        {parseFloat(reading.mmol_l).toFixed(1)}
-        {arrowsToIcons[reading.trend_arrow] || reading.trend_arrow}
+        {parseFloat(current.mmol_l).toFixed(1)}
+        {arrowsToIcons[current.trend_arrow] || current.trend_arrow}
       </div>
-      <div className={styles.updated}>Updated {dayjs(reading.last_cgm_reading).from(dayjs())}</div>
+      <div className={styles.updated}>Updated {dayjs(current.last_cgm_reading).from(dayjs())}</div>
     </div>
   )
 }
