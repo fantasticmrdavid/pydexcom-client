@@ -1,4 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
 import classNames from 'classnames'
 import styles from './styles.module.scss'
 import React, { ReactNode, useEffect, useState } from 'react'
@@ -12,6 +14,9 @@ import {
   TbArrowUp,
   TbArrowUpRight,
 } from 'react-icons/tb'
+
+const OUTDATED_MINUTES = 5
+dayjs.extend(relativeTime)
 
 const arrowsToIcons: { [key: string]: ReactNode } = {
   '↑↑': <TbArrowsUp />,
@@ -58,11 +63,14 @@ export default function Home() {
   if (isLoading || !data)
     return <div className={styles.container}>loading...</div>
 
+  const lastUpdateMinutesAgo = dayjs().diff(dayjs(reading.datetime), 'minutes')
+
   const counterClassNames = classNames({
     [styles.container]: true,
     [styles.bg_green]: reading.mmol_l > 4 && reading.mmol_l < 10,
     [styles.bg_orange]: reading.mmol_l >= 10,
     [styles.bg_purple]: reading.mmol_l <= 4,
+    [styles.bg_outdated]: lastUpdateMinutesAgo < OUTDATED_MINUTES
   })
 
   const displayClassNames = classNames({
@@ -77,7 +85,7 @@ export default function Home() {
         {parseFloat(reading.mmol_l).toFixed(1)}
         {arrowsToIcons[reading.trend_arrow] || reading.trend_arrow}
       </div>
-      <div className={styles.updated}>Updated {new Date(reading.datetime).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: true})}</div>
+      <div className={styles.updated}>Updated {dayjs().to(reading.datetime)}</div>
     </div>
   )
 }
