@@ -70,7 +70,7 @@ export default function Home() {
     [styles.bg_green]: reading.mmol_l > 4 && reading.mmol_l < 10,
     [styles.bg_orange]: reading.mmol_l >= 10,
     [styles.bg_purple]: reading.mmol_l <= 4,
-    [styles.bg_outdated]: lastUpdateMinutesAgo < OUTDATED_MINUTES
+    [styles.bg_outdated]: lastUpdateMinutesAgo > OUTDATED_MINUTES
   })
 
   const displayClassNames = classNames({
