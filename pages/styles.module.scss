@@ -1,5 +1,6 @@
 .container {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   flex-wrap: nowrap;
@@ -10,6 +11,10 @@
   font-size: 3em;
   font-weight: 700;
   overflow: hidden;
+
+  @media (min-height: 480px) and (min-width: 1920px) {
+    flex-direction: row;
+  }
 }
 
 .bg_green {
@@ -34,7 +39,7 @@
 .display4 {
   font-size: 39vw;
 
-  @media screen and (max-height: 480px) {
+  @media (min-height: 480px) and (min-width: 1920px) {
     font-size: 25vw;
   }
 }
@@ -42,7 +47,14 @@
 .display5 {
   font-size: 33vw;
 
-  @media screen and (max-height: 480px) {
+  @media (min-height: 480px) and (min-width: 1920px) {
     font-size: 25vw;
+  }
+}
+
+.updated {
+  font-size: 0.4em;
+  @media (min-height: 480px) and (min-width: 1920px) {
+    font-size: 1em;
   }
 }

@@ -77,6 +77,7 @@ export default function Home() {
         {parseFloat(reading.mmol_l).toFixed(1)}
         {arrowsToIcons[reading.trend_arrow] || reading.trend_arrow}
       </div>
+      <div className={styles.updated}>Updated {new Date(reading.datetime).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: true})}</div>
     </div>
   )
 }
