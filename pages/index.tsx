@@ -90,7 +90,6 @@ export default function Home() {
             data={[
               ['i', 'v'],
               ...readings
-                .slice(0, 6)
                 .reverse()
                 .map((r: Reading) => [
                   dayjs(r.last_cgm_reading).format('H:mm'),

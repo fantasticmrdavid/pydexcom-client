@@ -57,6 +57,9 @@
 }
 
 .chart {
+  position: relative;
+  transform: scale(1.2);
+  margin: -1em 0 1em;
   display: none;
 
   @media (min-height: 480px) and (min-width: 1920px) {

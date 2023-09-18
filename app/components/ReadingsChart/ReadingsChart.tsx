@@ -9,7 +9,6 @@ type Props = {
 
 export const ReadingsChart = ({ data }: Props) => {
   const options = {
-    curveType: 'function',
     backgroundColor: 'transparent',
     lineWidth: 4,
     colors: ['#000'],
@@ -19,6 +18,11 @@ export const ReadingsChart = ({ data }: Props) => {
       },
     },
     vAxis: {
+      ticks: [3, 5, 7, 9, 11],
+      viewWindow: {
+        min: 2,
+        max: 12,
+      },
       gridlines: {
         color: '#000',
       },
@@ -34,7 +38,7 @@ export const ReadingsChart = ({ data }: Props) => {
     <Chart
       chartType="LineChart"
       width="100%"
-      height="250px"
+      height="300px"
       data={data}
       options={options}
     />
