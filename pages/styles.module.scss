@@ -57,8 +57,9 @@
 }
 
 .updated {
-  font-size: 0.3em;
+  font-size: 0.75em;
+
   @media (min-height: 480px) and (min-width: 1920px) {
-    font-size: 1em;
+    font-size: 1.2em;
   }
 }
