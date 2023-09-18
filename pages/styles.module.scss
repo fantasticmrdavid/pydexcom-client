@@ -56,6 +56,14 @@
   }
 }
 
+.chart {
+  display: none;
+
+  @media (min-height: 480px) and (min-width: 1920px) {
+    display: block;
+  }
+}
+
 .updated {
   display: flex;
   justify-content: center;

@@ -13,6 +13,7 @@ import {
   TbArrowUp,
   TbArrowUpRight,
 } from 'react-icons/tb'
+import { ReadingsChart } from '@/app/components/ReadingsChart/ReadingsChart'
 
 const OUTDATED_MINUTES = 5
 dayjs.extend(relativeTime)
@@ -28,7 +29,7 @@ const arrowsToIcons: { [key: string]: ReactNode } = {
 }
 
 export default function Home() {
-  const [, setTime] = useState(new Date());
+  const [, setTime] = useState(new Date())
   const { data, isLoading } = useQuery(
     ['getReadings'],
     async () => await fetch(`/api/reading`).then((res) => res.json()),
@@ -39,27 +40,30 @@ export default function Home() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setTime(new Date());
-    }, 60000);
+      setTime(new Date())
+    }, 60000)
 
-    return () => clearInterval(interval);
-  }, []);
+    return () => clearInterval(interval)
+  }, [])
 
   const { readings } = data || {}
 
   if (isLoading || !data)
     return <div className={styles.container}>loading...</div>
-  
+
   const current = readings[0]
 
-  const lastUpdateMinutesAgo = dayjs().diff(dayjs(current.last_cgm_reading), 'minutes')
+  const lastUpdateMinutesAgo = dayjs().diff(
+    dayjs(current.last_cgm_reading),
+    'minutes',
+  )
 
   const counterClassNames = classNames({
     [styles.container]: true,
     [styles.bg_green]: current.mmol_l > 4 && current.mmol_l < 10,
     [styles.bg_orange]: current.mmol_l >= 10,
     [styles.bg_purple]: current.mmol_l <= 4,
-    [styles.bg_outdated]: lastUpdateMinutesAgo > OUTDATED_MINUTES
+    [styles.bg_outdated]: lastUpdateMinutesAgo > OUTDATED_MINUTES,
   })
 
   const displayClassNames = classNames({
@@ -74,7 +78,25 @@ export default function Home() {
         {parseFloat(current.mmol_l).toFixed(1)}
         {arrowsToIcons[current.trend_arrow] || current.trend_arrow}
       </div>
-      <div className={styles.updated}>Updated {dayjs(current.last_cgm_reading).from(dayjs())}</div>
+      <div>
+        <div className={styles.chart}>
+          <ReadingsChart
+            data={[
+              ['i', 'v'],
+              ...readings
+                .slice(0, 6)
+                .reverse()
+                .map((r) => [
+                  dayjs(r.last_cgm_reading).format('H:mm'),
+                  r.mmol_l,
+                ]),
+            ]}
+          />
+        </div>
+        <div className={styles.updated}>
+          Updated {dayjs(current.last_cgm_reading).from(dayjs())}
+        </div>
+      </div>
     </div>
   )
 }
