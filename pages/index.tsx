@@ -1,10 +1,9 @@
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import classNames from 'classnames'
 import styles from './styles.module.scss'
 import React, { ReactNode, useEffect, useState } from 'react'
-import axios from 'axios'
 import {
   TbArrowDown,
   TbArrowDownRight,
@@ -29,7 +28,7 @@ const arrowsToIcons: { [key: string]: ReactNode } = {
 }
 
 export default function Home() {
-  const [lastFetch, setLastFetch] = useState()
+  const [, setTime] = useState(new Date());
   const { data, isLoading } = useQuery(
     ['getReadings'],
     async () => await fetch(`/api/reading`).then((res) => res.json()),
@@ -38,32 +37,20 @@ export default function Home() {
     },
   )
 
-  const { reading } = data || {}
-
-  const addReading = useMutation({
-    mutationFn: () =>
-      axios.post('/api/reading', {
-        mmol_l: reading.mmol_l,
-        trend_arrow: reading.trend_arrow,
-        trend_description: reading.trend_description,
-        datetime: new Date(reading.datetime).toISOString(),
-      }),
-    onSuccess: () => {
-      setLastFetch(reading.datetime)
-    },
-    onError: (error) => {
-      console.log('ERROR: ', error)
-    },
-  })
-
   useEffect(() => {
-    if (reading && reading.datetime !== lastFetch) addReading.mutate()
-  }, [reading])
+    const interval = setInterval(() => {
+      setTime(new Date());
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const { reading } = data || {}
 
   if (isLoading || !data)
     return <div className={styles.container}>loading...</div>
 
-  const lastUpdateMinutesAgo = dayjs().diff(dayjs(reading.datetime), 'minutes')
+  const lastUpdateMinutesAgo = dayjs().diff(dayjs(reading.last_cgm_reading), 'minutes')
 
   const counterClassNames = classNames({
     [styles.container]: true,
@@ -85,7 +72,7 @@ export default function Home() {
         {parseFloat(reading.mmol_l).toFixed(1)}
         {arrowsToIcons[reading.trend_arrow] || reading.trend_arrow}
       </div>
-      <div className={styles.updated}>Updated {dayjs().to(reading.datetime)}</div>
+      <div className={styles.updated}>Updated {dayjs(reading.last_cgm_reading).from(dayjs())}</div>
     </div>
   )
 }
