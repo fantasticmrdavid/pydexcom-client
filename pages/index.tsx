@@ -15,6 +15,12 @@ import {
 } from 'react-icons/tb'
 import { ReadingsChart } from '@/app/components/ReadingsChart/ReadingsChart'
 
+if (!Array.prototype.toReversed) {
+  Array.prototype.toReversed = function () {
+    return Array.from(this).reverse()
+  }
+}
+
 export type Reading = {
   mmol_l: number
   last_cgm_reading: string
