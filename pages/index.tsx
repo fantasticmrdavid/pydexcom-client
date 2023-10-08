@@ -46,7 +46,7 @@ export default function Home() {
     ['getReadings'],
     async () => await fetch(`/api/reading`).then((res) => res.json()),
     {
-      refetchInterval: 6000,
+      refetchInterval: 60000,
     },
   )
 
