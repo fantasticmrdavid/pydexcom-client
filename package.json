@@ -21,7 +21,7 @@
     "classnames": "^2.3.2",
     "dayjs": "^1.11.9",
     "eslint": "8.49.0",
-    "eslint-config-next": "13.4.19",
+    "eslint-config-next": "13.5.1",
     "intl-relative-time-format": "^1.0.7",
     "next": "13.5.4",
     "postcss": "8.4.30",
