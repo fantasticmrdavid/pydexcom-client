@@ -3,16 +3,7 @@ import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import classNames from 'classnames'
 import styles from './styles.module.scss'
-import React, { ReactNode, useEffect, useState } from 'react'
-import {
-  TbArrowDown,
-  TbArrowDownRight,
-  TbArrowRight,
-  TbArrowsDown,
-  TbArrowsUp,
-  TbArrowUp,
-  TbArrowUpRight,
-} from 'react-icons/tb'
+import React, { useEffect, useState } from 'react'
 import { ReadingsChart } from '@/app/components/ReadingsChart/ReadingsChart'
 
 if (!Array.prototype.toReversed) {
@@ -29,16 +20,6 @@ export type Reading = {
 
 const OUTDATED_MINUTES = 5
 dayjs.extend(relativeTime)
-
-const arrowsToIcons: { [key: string]: ReactNode } = {
-  '↑↑': <TbArrowsUp />,
-  '↑': <TbArrowUp />,
-  '↗': <TbArrowUpRight />,
-  '→': <TbArrowRight />,
-  '↘': <TbArrowDownRight />,
-  '↓': <TbArrowDown />,
-  '↓↓': <TbArrowsDown />,
-}
 
 export default function Home() {
   const [, setTime] = useState(new Date())
