@@ -88,7 +88,6 @@ export default function Home() {
     <div className={counterClassNames}>
       <div className={displayClassNames}>
         {parseFloat(current.mmol_l).toFixed(1)}
-        {arrowsToIcons[current.trend_arrow] || current.trend_arrow}
       </div>
       <div>
         <div className={styles.chart}>
