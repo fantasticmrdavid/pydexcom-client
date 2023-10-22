@@ -27,5 +27,8 @@
       ],
       "minimumReleaseAge": "3 days"
     }
+  ],
+  "schedule": [
+    "monthly"
   ]
 }
