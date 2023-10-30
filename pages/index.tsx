@@ -23,13 +23,11 @@ dayjs.extend(relativeTime)
 
 export default function Home() {
   const [, setTime] = useState(new Date())
-  const { data, isLoading } = useQuery(
-    ['getReadings'],
-    async () => await fetch(`/api/reading`).then((res) => res.json()),
-    {
-      refetchInterval: 60000,
-    },
-  )
+  const { data, isLoading } = useQuery({
+    queryKey: ['getReadings'],
+    queryFn: async () => await fetch(`/api/reading`).then((res) => res.json()),
+    refetchInterval: 60000,
+  })
 
   useEffect(() => {
     const interval = setInterval(() => {
