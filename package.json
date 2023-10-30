@@ -19,7 +19,7 @@
     "autoprefixer": "10.4.16",
     "axios": "^1.6.0",
     "classnames": "^2.3.2",
-    "dayjs": "^1.11.9",
+    "dayjs": "^1.11.10",
     "eslint": "8.52.0",
     "eslint-config-next": "13.5.6",
     "intl-relative-time-format": "^1.0.7",
