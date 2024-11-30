@@ -32,7 +32,7 @@ export default function Home() {
   useEffect(() => {
     const interval = setInterval(() => {
       setTime(new Date())
-    }, 60000)
+    }, 10000)
 
     return () => clearInterval(interval)
   }, [])
