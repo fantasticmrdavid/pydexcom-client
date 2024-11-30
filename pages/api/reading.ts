@@ -1,14 +1,25 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import axios from 'axios'
 
-const { DEXCOM_JSON_URL } = process.env
+export type NIGHTSCOUT_READING = {
+  sgv: number
+  dateString: string
+  direction: string
+}
+
+const { NIGHTSCOUT_URL } = process.env
 export const getReadings = async (
   req: NextApiRequest,
-  res: NextApiResponse,
+  res: NextApiResponse<NIGHTSCOUT_READING>,
 ) => {
-  const results = await axios.get(`${DEXCOM_JSON_URL}`)
+  const results = await axios.get(`${NIGHTSCOUT_URL}`)
   const { data } = results
-  return res.status(200).json(data)
+  const normalizedData = data.map((reading: NIGHTSCOUT_READING) => ({
+    mmol_l: reading.sgv / 18,
+    last_cgm_reading: new Date(reading.dateString).toISOString(),
+    trend_arrow: reading.direction,
+  }))
+  return res.status(200).json(normalizedData)
 }
 
 export default async function handler(

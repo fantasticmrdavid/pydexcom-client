@@ -23,7 +23,7 @@ dayjs.extend(relativeTime)
 
 export default function Home() {
   const [, setTime] = useState(new Date())
-  const { data, isLoading } = useQuery({
+  const { data: readings, isLoading } = useQuery({
     queryKey: ['getReadings'],
     queryFn: async () => await fetch(`/api/reading`).then((res) => res.json()),
     refetchInterval: 10000,
@@ -37,9 +37,7 @@ export default function Home() {
     return () => clearInterval(interval)
   }, [])
 
-  const { readings } = data || {}
-
-  if (isLoading || !data)
+  if (isLoading || !readings)
     return <div className={styles.container}>loading...</div>
 
   const current = readings[0]
