@@ -26,7 +26,7 @@ export default function Home() {
   const { data, isLoading } = useQuery({
     queryKey: ['getReadings'],
     queryFn: async () => await fetch(`/api/reading`).then((res) => res.json()),
-    refetchInterval: 60000,
+    refetchInterval: 10000,
   })
 
   useEffect(() => {
