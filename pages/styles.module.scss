@@ -32,6 +32,11 @@
 
 .bg_outdated {
   filter: invert(1);
+
+  .display {
+    text-decoration: line-through;
+    opacity: 0.5;
+  }
 }
 
 .display {
