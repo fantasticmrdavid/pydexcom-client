@@ -7,6 +7,12 @@ export type NIGHTSCOUT_READING = {
   direction: string
 }
 
+export type NORMALIZED_READING = {
+  mmol_l: number
+  last_cgm_reading: string
+  trend_arrow: string
+}
+
 const { NIGHTSCOUT_URL } = process.env
 export const getReadings = async (
   req: NextApiRequest,
@@ -14,11 +20,17 @@ export const getReadings = async (
 ) => {
   const results = await axios.get(`${NIGHTSCOUT_URL}`)
   const { data } = results
-  const normalizedData = data.map((reading: NIGHTSCOUT_READING) => ({
-    mmol_l: reading.sgv / 18,
-    last_cgm_reading: new Date(reading.dateString).toISOString(),
-    trend_arrow: reading.direction,
-  }))
+  const normalizedData = data
+    .map((reading: NIGHTSCOUT_READING) => ({
+      mmol_l: reading.sgv / 18,
+      last_cgm_reading: new Date(reading.dateString).toISOString(),
+      trend_arrow: reading.direction,
+    }))
+    .sort(
+      (a: NORMALIZED_READING, b: NORMALIZED_READING) =>
+        new Date(b.last_cgm_reading).getTime() -
+        new Date(a.last_cgm_reading).getTime(),
+    )
   return res.status(200).json(normalizedData)
 }
 
