@@ -1,9 +1,18 @@
 import React, { useState } from 'react'
-import styles from './styles.module.scss'
+import {
+  Box,
+  Button,
+  Textarea,
+  Spinner,
+  Alert,
+  Container,
+} from '@chakra-ui/react'
+
+const DEFAULT_LOCATION = 'Ballan,AU'
 
 export default function Assistant() {
   const [prompt, setPrompt] = useState('')
-  const [location, setLocation] = useState('')
+  const [location] = useState(DEFAULT_LOCATION)
   const [response, setResponse] = useState(null)
   const [fullPrompt, setFullPrompt] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -45,43 +54,36 @@ export default function Assistant() {
   }
 
   return (
-    <div className={styles.container}>
+    <Container fluid>
       <form onSubmit={handleSubmit}>
-        <div>
-          <textarea
+        <Box mb={4}>
+          <Textarea
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             placeholder="Enter your prompt here"
-            className={styles.textarea}
+            width={'100%'}
             required
           />
-        </div>
-        <div>
-          <input
-            type="text"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            placeholder="Enter your location"
-            className={styles.input}
-            required
-          />
-        </div>
-        <div>
-          <button type="submit" className={styles.button}>
-            Submit
-          </button>
-        </div>
+        </Box>
+        <Button type="submit" colorScheme="teal">
+          Submit
+        </Button>
       </form>
-      {isLoading && <div>Loading...</div>}
-      {error && <div className={styles.error}>{error}</div>}
+      {isLoading && <Spinner mt={4} />}
+      {error && (
+        <Alert.Root status="error" mt={4}>
+          <Alert.Indicator />
+          <Alert.Title>{error}</Alert.Title>
+        </Alert.Root>
+      )}
       {response && (
-        <div>
+        <Box mt={4}>
           <h3>Response:</h3>
-          <pre>{JSON.stringify(response, null, 2)}</pre>
+          <pre>{response.message}</pre>
           <h3>Full Prompt:</h3>
           <pre>{fullPrompt}</pre>
-        </div>
+        </Box>
       )}
-    </div>
+    </Container>
   )
 }

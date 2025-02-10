@@ -17,7 +17,7 @@ const fetchReadings = async () => {
     )
   } catch (error) {
     throw new Error(
-      `Failed to fetch readings from ${NIGHTSCOUT_URL}: ${error.message}`,
+      `Failed to fetch readings from ${NIGHTSCOUT_URL}: ${(error as Error).message}`,
     )
   }
 }
@@ -36,7 +36,7 @@ const fetchWeather = async (location: string) => {
     return response.data
   } catch (error) {
     throw new Error(
-      `Failed to fetch weather from ${url} for location ${location}: ${error.message}`,
+      `Failed to fetch weather from ${url} for location ${location}: ${(error as Error).message}`,
     )
   }
 }
@@ -90,9 +90,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     )
 
     const data = await chatGPTResponse.json()
-    res
-      .status(200)
-      .json({ ...data, fullPrompt, readingsContext, weatherContext })
+    res.status(200).json({
+      ...data,
+      fullPrompt,
+      readingsContext,
+      weatherContext,
+      message: data.choices[0].message.content,
+    })
   } catch (error) {
     res.status(500).json({
       message: 'Internal server error',
