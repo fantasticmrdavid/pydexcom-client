@@ -56,6 +56,9 @@ importers:
       intl-relative-time-format:
         specifier: ^1.0.7
         version: 1.0.7
+      markdown-to-jsx:
+        specifier: ^7.7.3
+        version: 7.7.3(react@18.3.1)
       next:
         specifier: 14.2.21
         version: 14.2.21(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(sass@1.84.0)
@@ -1674,6 +1677,12 @@ packages:
 
   lru-cache@10.4.3:
     resolution: {integrity: sha512-JNAzZcXrCt42VGLuYz0zfAzDfAvJWW6AfYlDBQyDV5DClI2m5sAmK+OIO7s59XfsRsWHp02jAJrRadPRGTt6SQ==}
+
+  markdown-to-jsx@7.7.3:
+    resolution: {integrity: sha512-o35IhJDFP6Fv60zPy+hbvZSQMmgvSGdK5j8NRZ7FeZMY+Bgqw+dSg7SC1ZEzC26++CiOUCqkbq96/c3j/FfTEQ==}
+    engines: {node: '>= 10'}
+    peerDependencies:
+      react: '>= 0.14.0'
 
   math-intrinsics@1.1.0:
     resolution: {integrity: sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==}
@@ -4426,6 +4435,10 @@ snapshots:
       js-tokens: 4.0.0
 
   lru-cache@10.4.3: {}
+
+  markdown-to-jsx@7.7.3(react@18.3.1):
+    dependencies:
+      react: 18.3.1
 
   math-intrinsics@1.1.0: {}
 

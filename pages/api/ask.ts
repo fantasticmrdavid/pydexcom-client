@@ -11,7 +11,7 @@ const fetchReadings = async () => {
   try {
     const response = await axios.get(`${NIGHTSCOUT_URL}`)
     const readings = normalizeNightscoutData(response.data)
-    const oneHourAgo = dayjs().subtract(1, 'hour')
+    const oneHourAgo = dayjs().subtract(3, 'hour')
     return readings.filter((reading: NORMALIZED_READING) =>
       dayjs(reading.last_cgm_reading).isAfter(oneHourAgo),
     )
@@ -64,7 +64,22 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const weatherContext = `Weather in ${location}: ${weather.weather[0].description}, Temperature: ${weather.main.temp}°C`
 
-    const fullPrompt = `I have T1 Diabetes and am on a YpsoPump. ${prompt}\n\nContext:\n${readingsContext}\n\n${weatherContext}. What should I input into the pump to prepare for this meal and when to ensure my blood glucose levels are stable? Explain in simple terms.`
+    const fullPrompt = `I have T1 Diabetes and am on a YpsoPump. 
+      ${prompt}.
+      What should I input into the pump to ensure my blood glucose levels are stable? Please use the Android APS algorithm as well as the additional contextual data provided to form the basis of calculation and adjustments. Format response as follows: 
+      1. Start with the final actionable recommendation in slightly larger font to make it clearer.
+      2. Continue with clear and concise bullet points below in normal font size.
+      3. Highlight all numbers in bold to make them stand out.
+      
+      Readings from sensor:
+      ${readingsContext}.
+      
+      Context:
+      ${weatherContext}.
+      Insulin Sensitivity Factor: ${process.env.INSULIN_SENSITIVITY_FACTOR}.
+      Grams of carbs to 1 unit of insulin: ${process.env.INSULIN_TO_CARB_RATIO}.\n
+      Current local time: ${dayjs().format('YYYY-MM-DD HH:mm:ss')}.\n
+      `
 
     const chatGPTResponse = await fetch(
       'https://api.openai.com/v1/chat/completions',
