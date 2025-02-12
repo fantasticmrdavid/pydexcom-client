@@ -13,7 +13,7 @@ export type NORMALIZED_READING = {
   trend_arrow: string
 }
 
-export const normalizeNightscoutData = (data: any) => {
+export const normalizeNightscoutData = (data: NIGHTSCOUT_READING[]) => {
   return data
     .map((reading: NIGHTSCOUT_READING) => ({
       mmol_l: reading.sgv / 18,
@@ -30,7 +30,7 @@ export const normalizeNightscoutData = (data: any) => {
 const { NIGHTSCOUT_URL } = process.env
 export const getReadings = async (
   req: NextApiRequest,
-  res: NextApiResponse<NIGHTSCOUT_READING>,
+  res: NextApiResponse<NORMALIZED_READING[]>,
 ) => {
   const results = await axios.get(`${NIGHTSCOUT_URL}`)
   const { data } = results

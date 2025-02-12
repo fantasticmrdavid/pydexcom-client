@@ -1,19 +1,20 @@
 import React, { useState } from 'react'
-import {
-  Box,
-  Button,
-  Textarea,
-  Spinner,
-  Alert,
-  Container,
-} from '@chakra-ui/react'
+import { Box, Button, Textarea, Alert, Container } from '@chakra-ui/react'
+import Markdown from 'markdown-to-jsx'
+import './styles.css'
 
 const DEFAULT_LOCATION = 'Ballan,AU'
+
+interface ResponseData {
+  message: string
+  readingsContext: string
+  weatherContext: string
+}
 
 export default function Assistant() {
   const [prompt, setPrompt] = useState('')
   const [location] = useState(DEFAULT_LOCATION)
-  const [response, setResponse] = useState(null)
+  const [response, setResponse] = useState<ResponseData | null>(null)
   const [fullPrompt, setFullPrompt] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -61,15 +62,23 @@ export default function Assistant() {
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             placeholder="Enter your prompt here"
-            width={'100%'}
+            rows={4}
             required
           />
         </Box>
-        <Button type="submit" colorScheme="teal">
-          Submit
-        </Button>
+        <Box textAlign="right">
+          <Button
+            type="submit"
+            colorScheme="teal"
+            loading={isLoading}
+            spinnerPlacement="start"
+            loadingText="Thinking..."
+            disabled={isLoading}
+          >
+            Submit
+          </Button>
+        </Box>
       </form>
-      {isLoading && <Spinner mt={4} />}
       {error && (
         <Alert.Root status="error" mt={4}>
           <Alert.Indicator />
@@ -78,10 +87,13 @@ export default function Assistant() {
       )}
       {response && (
         <Box mt={4}>
-          <h3>Response:</h3>
-          <pre>{response.message}</pre>
-          <h3>Full Prompt:</h3>
-          <pre>{fullPrompt}</pre>
+          <Box mb={4}>
+            <Markdown>{response.message}</Markdown>
+          </Box>
+          <h3 className="font-bold">Full Prompt:</h3>
+          <Box>
+            <Markdown>{fullPrompt}</Markdown>
+          </Box>
         </Box>
       )}
     </Container>
