@@ -4,6 +4,8 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import axios from 'axios'
 import { NORMALIZED_READING, normalizeNightscoutData } from './reading'
 
+export const maxDuration = 15
+
 dayjs.extend(relativeTime)
 
 const fetchReadings = async () => {
