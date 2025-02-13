@@ -60,7 +60,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const readingsContext = readings
       .map(
         (reading: NORMALIZED_READING) =>
-          `Time: ${reading.last_cgm_reading}, Value: ${reading.mmol_l}`,
+          `Time: ${reading.last_cgm_reading}, Value: ${reading.mmol_l.toFixed(2)}`,
       )
       .join('\n')
 
@@ -68,7 +68,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const fullPrompt = `I have T1 Diabetes and am on a YpsoPump. 
       ${prompt}.
-      What should I input into the pump to ensure my blood glucose levels are stable? Please use the Australia definition of carbs and nutrition as well as prioritizing Australia sources when possible when referencing nutrition information. Please also use the Android APS algorithm as well as the additional contextual data provided to form the basis of calculation and adjustments. Format response as follows: 
+      What should I input into the pump to ensure my blood glucose levels are stable? Please breakdown the dosage into pre and extended bolus.
+      Please use the Australia definition of carbs and nutrition as well as prioritizing Australia sources when possible when referencing nutrition information. Please also use the Android APS algorithm as well as the additional contextual data provided to form the basis of calculation and adjustments. Format response as follows: 
       1. Start with the final actionable recommendation in slightly larger font to make it clearer.
       2. Continue with clear and concise bullet points below in normal font size.
       3. Highlight all numbers in bold to make them stand out.
@@ -81,6 +82,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       Insulin Sensitivity Factor: ${process.env.INSULIN_SENSITIVITY_FACTOR}.
       Grams of carbs to 1 unit of insulin: ${process.env.INSULIN_TO_CARB_RATIO}.\n
       Current local time: ${dayjs().format('YYYY-MM-DD HH:mm:ss')}.\n
+      Bedtime: 10pm.\n
+      Target bedtime BGL: ${process.env.TARGET_BGL_BEDTIME}.\n
       `
 
     const chatGPTResponse = await fetch(
