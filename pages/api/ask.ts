@@ -64,24 +64,29 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       )
       .join('\n')
 
-    const weatherContext = `Weather in ${location}: ${weather.weather[0].description}, Temperature: ${weather.main.temp}°C`
+    const weatherContext = `**Weather (${location}): ${weather.weather[0].description}, Temperature: ${weather.main.temp}°C`
 
-    const fullPrompt = `I have T1 Diabetes and am on a YpsoPump. 
+    const fullPrompt = `I have T1 Diabetes and use a YpsoPump. 
       ${prompt}.
-      What should I input into the pump to ensure my blood glucose levels are stable? Please breakdown the dosage into pre and extended bolus.
-      Please use the Australia definition of carbs and nutrition as well as prioritizing Australia sources when possible when referencing nutrition information. Please also use the Android APS algorithm as well as the additional contextual data provided to form the basis of calculation and adjustments. Format response as follows: 
-      1. Start with the final actionable recommendation in slightly larger font to make it clearer.
-      2. Continue with clear and concise bullet points below in normal font size.
-      3. Highlight all numbers in bold to make them stand out.
+      How should I dose my pump to keep BGL stable? Break down the dosage into **pre-bolus** and **extended bolus**.
       
-      Readings from sensor:
+      **Guidelines:**  
+      - Use **Australian carb/nutrition data**, prioritizing Australian sources.  
+      - Use **Android APS algorithm** and provided contextual data for calculations.  
+      - Format response as follows:  
+        1. **Final dosage recommendation** (slightly larger font).  
+        2. **Clear, concise bullet points**.  
+        3. **Bold all numeric values**.  
+      
+      
+      **Latest CGM Readings:**
       ${readingsContext}.
       
-      Context:
+      **Context:**
       ${weatherContext}.
-      Insulin Sensitivity Factor: ${process.env.INSULIN_SENSITIVITY_FACTOR}.
-      Grams of carbs to 1 unit of insulin: ${process.env.INSULIN_TO_CARB_RATIO}.\n
-      Current local time: ${dayjs().format('YYYY-MM-DD HH:mm:ss')}.\n
+      **ISF:** ${process.env.INSULIN_SENSITIVITY_FACTOR}.
+      **Carb Ratio:** ${process.env.INSULIN_TO_CARB_RATIO}.\n
+      **Current time:** ${dayjs().format('HH:mm')}.\n
       Bedtime: 10pm.\n
       Target bedtime BGL: ${process.env.TARGET_BGL_BEDTIME}.\n
       `
