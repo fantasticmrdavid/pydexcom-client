@@ -37,9 +37,7 @@ export default function Assistant() {
       const data = await res.json()
       if (res.ok) {
         setResponse(data)
-        setFullPrompt(
-          `${prompt}\n\nContext:\n${data.readingsContext}\n\n${data.weatherContext}`,
-        )
+        setFullPrompt(data.fullPrompt)
       } else {
         setError(data.message || 'An error occurred')
       }
@@ -92,7 +90,9 @@ export default function Assistant() {
           </Box>
           <h3 className="font-bold">Full Prompt:</h3>
           <Box>
-            <Markdown>{fullPrompt}</Markdown>
+            <code>
+              <Markdown>{fullPrompt}</Markdown>
+            </code>
           </Box>
         </Box>
       )}

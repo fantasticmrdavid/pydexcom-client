@@ -66,19 +66,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const weatherContext = `**Weather (${location}): ${weather.weather[0].description}, Temperature: ${weather.main.temp}°C`
 
-    const fullPrompt = `I have T1 Diabetes and use a YpsoPump. 
-      ${prompt}.
-      How should I dose my pump to keep BGL stable? Break down the dosage into **pre-bolus** and **extended bolus**.
-      
+    const fullPrompt = `Act as a Diabetes educator. I have T1 Diabetes and use a YpsoPump. ${prompt}. How should I dose my pump to keep BGL stable? Break down the dosage into **pre-bolus** and **extended bolus**.
+
       **Guidelines:**  
-      - Use **Australian carb/nutrition data**, prioritizing Australian sources.  
+      - Use **Australian carb/nutrition data**, prioritizing newer Australian sources.  
       - Use **Android APS algorithm** and provided contextual data for calculations.  
       - Format response as follows:  
         1. **Final dosage recommendation** (slightly larger font).  
         2. **Clear, concise bullet points**.  
         3. **Bold all numeric values**.  
-      
-      
+            
       **Latest CGM Readings:**
       ${readingsContext}.
       
