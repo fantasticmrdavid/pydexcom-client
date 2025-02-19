@@ -10,7 +10,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
   const [queryClient] = useState(() => new QueryClient())
   return (
     <QueryClientProvider client={queryClient}>
-      <ChakraUIProvider>
+      <ChakraUIProvider forcedTheme={'light'}>
         <Component {...pageProps} />
       </ChakraUIProvider>
     </QueryClientProvider>
