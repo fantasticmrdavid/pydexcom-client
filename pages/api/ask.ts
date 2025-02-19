@@ -12,11 +12,11 @@ dayjs.extend(relativeTime)
 const fetchReadings = async () => {
   const { NIGHTSCOUT_URL } = process.env
   try {
-    const response = await axios.get(`${NIGHTSCOUT_URL}`)
+    const response = await axios.get(`${NIGHTSCOUT_URL}?count=36`)
     const readings = normalizeNightscoutData(response.data)
-    const oneHourAgo = dayjs().subtract(3, 'hour')
+    const hoursAgo = dayjs().subtract(3, 'hour')
     return readings.filter((reading: NORMALIZED_READING) =>
-      dayjs(reading.last_cgm_reading).isAfter(oneHourAgo),
+      dayjs(reading.last_cgm_reading).isAfter(hoursAgo),
     )
   } catch (error) {
     throw new Error(

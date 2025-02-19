@@ -208,7 +208,9 @@ export default function Assistant() {
               <Card.Body gap="2">
                 <Card.Title>🗒️ Notes</Card.Title>
                 <Card.Description>
-                  <Text color="fg.muted">{responseJson.notes}</Text>
+                  <Text color="fg.muted">
+                    <Markdown>{responseJson.notes}</Markdown>
+                  </Text>
                 </Card.Description>
               </Card.Body>
               <Card.Footer />
