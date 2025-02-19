@@ -62,28 +62,30 @@ export default function Home() {
   })
 
   return (
-    <div className={counterClassNames}>
-      <div className={displayClassNames}>
-        {parseFloat(current.mmol_l).toFixed(1)}
-      </div>
-      <div>
-        <div className={styles.chart}>
-          <ReadingsChart
-            data={[
-              ['i', 'v'],
-              ...readings
-                .toReversed()
-                .map((r: Reading) => [
-                  dayjs(r.last_cgm_reading).format('H:mm'),
-                  r.mmol_l,
-                ]),
-            ]}
-          />
+    <>
+      <div className={counterClassNames}>
+        <div className={displayClassNames}>
+          {parseFloat(current.mmol_l).toFixed(1)}
         </div>
-        <div className={styles.updated}>
-          Updated {dayjs(current.last_cgm_reading).from(dayjs())}
+        <div>
+          <div className={styles.chart}>
+            <ReadingsChart
+              data={[
+                ['i', 'v'],
+                ...readings
+                  .toReversed()
+                  .map((r: Reading) => [
+                    dayjs(r.last_cgm_reading).format('H:mm'),
+                    r.mmol_l,
+                  ]),
+              ]}
+            />
+          </div>
+          <div className={styles.updated}>
+            Updated {dayjs(current.last_cgm_reading).from(dayjs())}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }

@@ -67,7 +67,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const weatherContext = `**Weather (${location}): ${weather.weather[0].description}, Temperature: ${weather.main.temp}°C`
 
-    const fullPrompt = `You are an advanced Diabetes educator specializing in Type 1 diabetes and insulin pump therapy. I have T1 Diabetes and use a YpsoPump. ${prompt}. How should I dose my pump to keep BGL stable? Break down the dosage into **pre-bolus** and **extended bolus**.
+    const fullPrompt = `You are an advanced Diabetes educator specializing in Type 1 diabetes and insulin pump therapy. I have T1 Diabetes and use a YpsoPump. ${prompt}. How should I dose my pump to keep BGL stable?
 
       **Guidelines:**  
       - Use **Australian carb/nutrition data**, prioritizing the most recent and region-specific data Australian sources.
@@ -75,8 +75,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       - Format response as follows:
         1. **Final dosage recommendation** (slightly larger font).
         2. **Clear, concise bullet points**.
-        3. **Bold all numerical values**.
-
+      
       **Latest CGM Readings:**
       ${readingsContext}.
 
@@ -87,6 +86,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       **Current time:** ${dayjs().format('HH:mm')}.\n
       Bedtime: 10pm.\n
       Target bedtime BGL: ${process.env.TARGET_BGL_BEDTIME}.\n
+      
+      **Response Schema:**
+      - **finalRecommendation:** Break down the final dosage into **preBolus** and **extendedBolus**.
+      - **dosageBreakdown:** Provide a detailed breakdown of the dosage broken down into **step** and **detail**.
+      - **notes:** Include any additional notes or considerations.
+      
+      **Return in JSON format as per the above Response Schema**
       `
 
     const openai = new OpenAI({
@@ -105,9 +111,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       ],
       temperature: 0.2,
       top_p: 0.9,
+      response_format: {
+        type: 'json_object',
+      },
     })
 
     const message = chatGPTResponse.choices[0].message?.content || ''
+    const responseJson = JSON.parse(
+      chatGPTResponse.choices[0].message?.content || '{}',
+    )
 
     res.status(200).json({
       ...chatGPTResponse,
@@ -115,6 +127,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       readingsContext,
       weatherContext,
       message,
+      responseJson,
     })
   } catch (error) {
     res.status(500).json({
