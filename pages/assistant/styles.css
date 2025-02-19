@@ -4,6 +4,7 @@ body {
     align-content: center;
     justify-content: center;
     width: 100%;
+    background-color: #f8f8f8;
 }
 
 #__next {
@@ -22,4 +23,8 @@ ul ul {
 
 ul ul ul {
     list-style-type: square;
+}
+
+code, code * {
+    white-space: break-spaces;
 }

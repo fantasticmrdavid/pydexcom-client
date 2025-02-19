@@ -72,6 +72,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       **Guidelines:**  
       - Use **Australian carb/nutrition data**, prioritizing the most recent and region-specific data Australian sources.
       - Use **Android APS algorithm** and provided contextual data for calculations.
+      - Round all insulin dosage recommendations to the nearest 0.5. Round up if BGL is high or trending up, down if low or trending down. 
       - Format response as follows:
         1. **Final dosage recommendation** (slightly larger font).
         2. **Clear, concise bullet points**.
@@ -88,8 +89,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       Target bedtime BGL: ${process.env.TARGET_BGL_BEDTIME}.\n
       
       **Response Schema:**
-      - **finalRecommendation:** Break down the final dosage into **preBolus** and **extendedBolus**.
-      - **dosageBreakdown:** Provide a detailed breakdown of the dosage broken down into **step** and **detail**.
+      - **finalRecommendation:** Break down the final dosage into **preBolus** and **extendedBolus**. Also include the current BGL and trend direction.
+      - **dosageBreakdown:** Provide a detailed breakdown of the dosage broken down into **step** and **detail**. Format all numerical values in bold markdown for this section only. Explain when Android APS algorithm has been used.
       - **notes:** Include any additional notes or considerations.
       
       **Return in JSON format as per the above Response Schema**
