@@ -22,8 +22,8 @@ const trendDirectionIcons: { [key: string]: string } = {
   rising: '↑',
   dropping: '↓',
   Stable: '→',
-  upward: '↗',
-  downward: '↘',
+  Increasing: '↗',
+  Decreasing: '↘',
   'rapidly rising': '⇈',
   'rapidly dropping': '⇊',
 }
@@ -95,7 +95,7 @@ export default function Assistant() {
       <Head>
         <title>🦾 Betabot</title>
       </Head>
-      <Container fluid className={'p-8'}>
+      <Container fluid className={'p-4 md:p-8'}>
         <Center className={'my-4'}>
           <h1 className={'text-[36px] font-bold'}>🦾 Betabot</h1>
         </Center>
@@ -143,18 +143,28 @@ export default function Assistant() {
             <Card.Root my={4} className={'bg-[rgba(97,225,66,0.3)]'}>
               <Card.Body gap="2">
                 <Card.Title fontSize={'x-large'}>
-                  🩸 Recommended Action (
-                  {
-                    trendDirectionIcons[
-                      responseJson.finalRecommendation.trendDirection
-                    ]
-                  }
-                  {responseJson.finalRecommendation.currentBGL})
+                  🩸 Recommended Action
                 </Card.Title>
                 <Card.Description>
                   <HStack mt="4" align={'start'}>
                     <Text fontSize={'lg'} fontWeight="semibold">
-                      Pre-Bolus
+                      Current BGL:
+                    </Text>
+                    <Text fontSize={'lg'} color="fg.muted">
+                      {responseJson.finalRecommendation.currentBGL.replace(
+                        'mmol/L',
+                        '',
+                      )}
+                      {
+                        trendDirectionIcons[
+                          responseJson.finalRecommendation.trendDirection
+                        ]
+                      }
+                    </Text>
+                  </HStack>
+                  <HStack mt="4" align={'start'}>
+                    <Text fontSize={'lg'} fontWeight="semibold">
+                      Pre-Bolus:
                     </Text>
                     <Text fontSize={'lg'} color="fg.muted">
                       {responseJson.finalRecommendation.preBolus}
@@ -162,7 +172,7 @@ export default function Assistant() {
                   </HStack>
                   <HStack mt="4" align={'start'}>
                     <Text fontSize={'lg'} fontWeight="semibold">
-                      Extended Bolus
+                      Extended Bolus:
                     </Text>
                     <Text fontSize={'lg'} color="fg.muted">
                       {responseJson.finalRecommendation.extendedBolus}
