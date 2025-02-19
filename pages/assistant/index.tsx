@@ -13,7 +13,6 @@ import {
   Text,
 } from '@chakra-ui/react'
 import Markdown from 'markdown-to-jsx'
-import { useQuery } from '@tanstack/react-query'
 import './styles.css'
 
 const DEFAULT_LOCATION = 'Ballan,AU'
@@ -58,6 +57,7 @@ async function fetchResponse(
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ prompt, location }),
+    signal: AbortSignal.timeout(30 * 1000),
   })
   if (!res.ok) {
     const errorData = await res.json()
@@ -67,15 +67,12 @@ async function fetchResponse(
 }
 
 export default function Assistant() {
+  const [data, setData] = useState<ResponseData | null>(null)
   const [prompt, setPrompt] = useState('')
   const [location] = useState(DEFAULT_LOCATION)
   const [fullPrompt, setFullPrompt] = useState('')
-
-  const { data, error, isLoading, refetch } = useQuery<ResponseData, Error>({
-    queryKey: ['fetchResponse', { prompt, location }],
-    queryFn: () => fetchResponse(prompt, location),
-    enabled: false, // Disable automatic query execution
-  })
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<Error | null>(null)
 
   useEffect(() => {
     if (!isLoading && data) {
@@ -83,9 +80,16 @@ export default function Assistant() {
     }
   }, [data])
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
-    refetch()
+    setIsLoading(true)
+    try {
+      const res = await fetchResponse(prompt, location)
+      setData(res)
+    } catch (error) {
+      setError(error as Error)
+    }
+    setIsLoading(false)
   }
 
   const { responseJson } = data ? data : {}
@@ -138,20 +142,23 @@ export default function Assistant() {
             <Alert.Title>{error.message}</Alert.Title>
           </Alert.Root>
         )}
-        {responseJson && !isLoading && (
+        {data && responseJson && !isLoading && (
           <>
             <Card.Root my={4} className={'bg-[rgba(97,225,66,0.3)]'}>
               <Card.Body gap="2">
                 <Card.Title fontSize={'x-large'}>
                   🩸 Recommended Action
                 </Card.Title>
-                <Card.Description>
+                <Box>
                   <HStack mt="4" align={'start'}>
                     <Text fontSize={'lg'} fontWeight="semibold">
                       Current BGL:
                     </Text>
                     <Text fontSize={'lg'} color="fg.muted">
-                      {responseJson.finalRecommendation.currentBGL}
+                      {responseJson.finalRecommendation.currentBGL.replace(
+                        'mmol/L',
+                        '',
+                      )}
                       {
                         trendDirectionIcons[
                           responseJson.finalRecommendation.trendDirection
@@ -175,51 +182,47 @@ export default function Assistant() {
                       {responseJson.finalRecommendation.extendedBolus}
                     </Text>
                   </HStack>
-                </Card.Description>
+                </Box>
               </Card.Body>
               <Card.Footer />
             </Card.Root>
             <Card.Root my={4} className={'bg-white'}>
               <Card.Body gap="2">
                 <Card.Title>💉 Dosage Breakdown</Card.Title>
-                <Card.Description>
-                  <Stack>
-                    {responseJson.dosageBreakdown.map((item) => (
-                      <HStack
-                        align={'start'}
-                        key={`dosageBreakdown_${item.step}`}
-                        mt="4"
-                      >
-                        <Text fontWeight="semibold">{item.step}:</Text>
-                        <Text color="fg.muted">
-                          <Markdown>{item.detail}</Markdown>
-                        </Text>
-                      </HStack>
-                    ))}
-                  </Stack>
-                </Card.Description>
+                <Stack>
+                  {responseJson.dosageBreakdown.map((item) => (
+                    <HStack
+                      align={'start'}
+                      key={`dosageBreakdown_${item.step}`}
+                      mt="4"
+                    >
+                      <Text fontWeight="semibold">{item.step}:</Text>
+                      <Text color="fg.muted">
+                        <Markdown>{item.detail}</Markdown>
+                      </Text>
+                    </HStack>
+                  ))}
+                </Stack>
               </Card.Body>
               <Card.Footer />
             </Card.Root>
             <Card.Root my={4} className={'bg-white'}>
               <Card.Body gap="2">
                 <Card.Title>🗒️ Notes</Card.Title>
-                <Card.Description>
+                <Box className={'my-4'}>
                   <Text color="fg.muted">
                     <Markdown>{responseJson.notes}</Markdown>
                   </Text>
-                </Card.Description>
+                </Box>
               </Card.Body>
               <Card.Footer />
             </Card.Root>
             <Card.Root my={4} className={'bg-white'}>
               <Card.Body gap="2">
                 <Card.Title>✏️ Full Prompt</Card.Title>
-                <Card.Description fontSize="sm">
-                  <code>
-                    <Markdown>{fullPrompt}</Markdown>
-                  </code>
-                </Card.Description>
+                <Box fontSize="sm">
+                  <code>{fullPrompt}</code>
+                </Box>
               </Card.Body>
             </Card.Root>
           </>
