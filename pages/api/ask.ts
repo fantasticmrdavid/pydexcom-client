@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import axios from 'axios'
+import OpenAI from 'openai'
 import { NORMALIZED_READING, normalizeNightscoutData } from './reading'
 
 export const maxDuration = 15
@@ -66,19 +67,19 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const weatherContext = `**Weather (${location}): ${weather.weather[0].description}, Temperature: ${weather.main.temp}°C`
 
-    const fullPrompt = `Act as a Diabetes educator. I have T1 Diabetes and use a YpsoPump. ${prompt}. How should I dose my pump to keep BGL stable? Break down the dosage into **pre-bolus** and **extended bolus**.
+    const fullPrompt = `You are an advanced Diabetes educator specializing in Type 1 diabetes and insulin pump therapy. I have T1 Diabetes and use a YpsoPump. ${prompt}. How should I dose my pump to keep BGL stable? Break down the dosage into **pre-bolus** and **extended bolus**.
 
       **Guidelines:**  
-      - Use **Australian carb/nutrition data**, prioritizing newer Australian sources.  
-      - Use **Android APS algorithm** and provided contextual data for calculations.  
-      - Format response as follows:  
-        1. **Final dosage recommendation** (slightly larger font).  
-        2. **Clear, concise bullet points**.  
-        3. **Bold all numeric values**.  
-            
+      - Use **Australian carb/nutrition data**, prioritizing the most recent and region-specific data Australian sources.
+      - Use **Android APS algorithm** and provided contextual data for calculations.
+      - Format response as follows:
+        1. **Final dosage recommendation** (slightly larger font).
+        2. **Clear, concise bullet points**.
+        3. **Bold all numerical values**.
+
       **Latest CGM Readings:**
       ${readingsContext}.
-      
+
       **Context:**
       ${weatherContext}.
       **ISF:** ${process.env.INSULIN_SENSITIVITY_FACTOR}.
@@ -88,36 +89,32 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       Target bedtime BGL: ${process.env.TARGET_BGL_BEDTIME}.\n
       `
 
-    const chatGPTResponse = await fetch(
-      'https://api.openai.com/v1/chat/completions',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: 'gpt-4-turbo',
-          messages: [
-            {
-              role: 'system',
-              content:
-                'You are a helpful assistant providing diabetes management advice.',
-            },
-            { role: 'user', content: fullPrompt }, // Dynamic prompt input
-          ],
-          temperature: 0.7,
-        }),
-      },
-    )
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    })
 
-    const data = await chatGPTResponse.json()
+    const chatGPTResponse = await openai.chat.completions.create({
+      model: 'gpt-4-turbo',
+      messages: [
+        {
+          role: 'system',
+          content:
+            'You are a helpful assistant providing diabetes management advice.',
+        },
+        { role: 'user', content: fullPrompt },
+      ],
+      temperature: 0.2,
+      top_p: 0.9,
+    })
+
+    const message = chatGPTResponse.choices[0].message?.content || ''
+
     res.status(200).json({
-      ...data,
+      ...chatGPTResponse,
       fullPrompt,
       readingsContext,
       weatherContext,
-      message: data.choices[0].message.content,
+      message,
     })
   } catch (error) {
     res.status(500).json({
