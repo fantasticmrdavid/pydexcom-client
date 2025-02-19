@@ -76,6 +76,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       - Format response as follows:
         1. **Final dosage recommendation** (slightly larger font).
         2. **Clear, concise bullet points**.
+        3. Adjust datetime values to local timezone. 
       
       **Latest CGM Readings:**
       ${readingsContext}.

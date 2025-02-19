@@ -151,10 +151,7 @@ export default function Assistant() {
                       Current BGL:
                     </Text>
                     <Text fontSize={'lg'} color="fg.muted">
-                      {responseJson.finalRecommendation.currentBGL.replace(
-                        'mmol/L',
-                        '',
-                      )}
+                      {responseJson.finalRecommendation.currentBGL}
                       {
                         trendDirectionIcons[
                           responseJson.finalRecommendation.trendDirection
