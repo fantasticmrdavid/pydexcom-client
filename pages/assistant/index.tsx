@@ -19,6 +19,7 @@ import './styles.css'
 
 declare global {
   interface Window {
+    SpeechRecognition: typeof SpeechRecognition
     webkitSpeechRecognition: typeof SpeechRecognition
   }
 }
@@ -101,12 +102,14 @@ export default function Assistant() {
   }
 
   const handleSpeechToTextSubmit = async () => {
-    if (!('webkitSpeechRecognition' in window)) {
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SpeechRecognition) {
       alert('Speech recognition not supported in this browser.')
       return
     }
 
-    const recognition = new window.webkitSpeechRecognition()
+    const recognition = new SpeechRecognition()
     recognition.continuous = false
     recognition.interimResults = false
     recognition.lang = 'en-US'
