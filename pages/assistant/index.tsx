@@ -180,6 +180,7 @@ export default function Assistant() {
               <Button
                 colorScheme="blue"
                 onClick={handleSpeechToTextSubmit}
+                onTouchStart={handleSpeechToTextSubmit}
                 disabled={isLoading}
                 className={'w-full'}
               >
