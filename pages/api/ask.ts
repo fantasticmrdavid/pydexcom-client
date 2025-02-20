@@ -5,7 +5,7 @@ import axios from 'axios'
 import OpenAI from 'openai'
 import { NORMALIZED_READING, normalizeNightscoutData } from './reading'
 
-export const maxDuration = 15
+export const maxDuration = 30 // Seconds
 
 dayjs.extend(relativeTime)
 
