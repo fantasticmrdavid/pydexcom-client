@@ -9,11 +9,19 @@ import {
   Card,
   Container,
   HStack,
+  Grid,
   Stack,
   Text,
 } from '@chakra-ui/react'
+import { FaMicrophone } from 'react-icons/fa'
 import Markdown from 'markdown-to-jsx'
 import './styles.css'
+
+declare global {
+  interface Window {
+    webkitSpeechRecognition: typeof SpeechRecognition
+  }
+}
 
 const DEFAULT_LOCATION = 'Ballan,AU'
 
@@ -92,6 +100,37 @@ export default function Assistant() {
     setIsLoading(false)
   }
 
+  const handleSpeechToTextSubmit = async () => {
+    if (!('webkitSpeechRecognition' in window)) {
+      alert('Speech recognition not supported in this browser.')
+      return
+    }
+
+    const recognition = new window.webkitSpeechRecognition()
+    recognition.continuous = false
+    recognition.interimResults = false
+    recognition.lang = 'en-US'
+
+    recognition.onresult = async (event: SpeechRecognitionEvent) => {
+      const speechResult = event.results[0][0].transcript
+      setPrompt(speechResult)
+      setIsLoading(true)
+      try {
+        const res = await fetchResponse(speechResult, location)
+        setData(res)
+      } catch (error) {
+        setError(error as Error)
+      }
+      setIsLoading(false)
+    }
+
+    recognition.onerror = (event: Event) => {
+      console.error('Speech recognition error', event)
+    }
+
+    recognition.start()
+  }
+
   const { responseJson } = data ? data : {}
 
   return (
@@ -123,17 +162,27 @@ export default function Assistant() {
             />
           </Box>
           <Box textAlign="right">
-            <Button
-              type="submit"
-              colorScheme="teal"
-              loading={isLoading}
-              spinnerPlacement="start"
-              loadingText="Thinking..."
-              disabled={isLoading}
-              className={'w-full'}
-            >
-              Submit
-            </Button>
+            <Grid templateColumns="75% 1fr" gap={2}>
+              <Button
+                type="submit"
+                colorScheme="teal"
+                loading={isLoading}
+                spinnerPlacement="start"
+                loadingText="Thinking..."
+                disabled={isLoading}
+                className={'w-full'}
+              >
+                Submit
+              </Button>
+              <Button
+                colorScheme="blue"
+                onClick={handleSpeechToTextSubmit}
+                disabled={isLoading}
+                className={'w-full'}
+              >
+                <FaMicrophone />
+              </Button>
+            </Grid>
           </Box>
         </form>
         {error && (
