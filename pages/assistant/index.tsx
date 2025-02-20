@@ -112,7 +112,7 @@ export default function Assistant() {
     const recognition = new SpeechRecognition()
     recognition.continuous = false
     recognition.interimResults = false
-    recognition.lang = 'en-US'
+    recognition.lang = 'en-au'
 
     recognition.onresult = async (event: SpeechRecognitionEvent) => {
       const speechResult = event.results[0][0].transcript
@@ -207,10 +207,7 @@ export default function Assistant() {
                       Current BGL:
                     </Text>
                     <Text fontSize={'lg'} color="fg.muted">
-                      {responseJson.finalRecommendation.currentBGL.replace(
-                        'mmol/L',
-                        '',
-                      )}
+                      {responseJson.finalRecommendation.currentBGL}
                       {
                         trendDirectionIcons[
                           responseJson.finalRecommendation.trendDirection

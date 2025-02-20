@@ -90,7 +90,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     Target bedtime BGL: ${process.env.TARGET_BGL_BEDTIME}.\n
     
     **Response Schema:**
-    - **finalRecommendation:** Break down the final dosage into **preBolus** and **extendedBolus**. Also include the current BGL and trend direction.
+    - **finalRecommendation:** Break down the final dosage into **preBolus** and **extendedBolus**. Also include the current **BGL** and **trend direction**.
     - **dosageBreakdown:** Provide a detailed breakdown of the dosage broken down into **step** and **detail**. Format all numerical values in bold markdown for this section only. Explain when Android APS algorithm has been used.
     - **notes:** Include any additional notes or considerations.
     
