@@ -82,12 +82,20 @@ export default function Assistant() {
   const [fullPrompt, setFullPrompt] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
+  const [hasSpeechRecognitionApi, setHasSpeechRecognitionApi] = useState(false)
 
   useEffect(() => {
     if (!isLoading && data) {
       setFullPrompt(data.fullPrompt)
     }
-  }, [data])
+  }, [data, isLoading])
+
+  useEffect(() => {
+    setHasSpeechRecognitionApi(
+      typeof window !== 'undefined' &&
+        !!(window.SpeechRecognition || window.webkitSpeechRecognition),
+    )
+  }, [])
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
@@ -102,14 +110,8 @@ export default function Assistant() {
   }
 
   const handleSpeechToTextSubmit = async () => {
-    const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition
-    if (!SpeechRecognition) {
-      alert('Speech recognition not supported in this browser.')
-      return
-    }
-
-    const recognition = new SpeechRecognition()
+    const recognition = new (window.SpeechRecognition ||
+      window.webkitSpeechRecognition)()
     recognition.continuous = false
     recognition.interimResults = false
     recognition.lang = 'en-au'
@@ -177,15 +179,17 @@ export default function Assistant() {
               >
                 Submit
               </Button>
-              <Button
-                colorScheme="blue"
-                onClick={handleSpeechToTextSubmit}
-                onTouchStart={handleSpeechToTextSubmit}
-                disabled={isLoading}
-                className={'w-full'}
-              >
-                <FaMicrophone />
-              </Button>
+              {hasSpeechRecognitionApi && (
+                <Button
+                  colorScheme="blue"
+                  onClick={handleSpeechToTextSubmit}
+                  onTouchStart={handleSpeechToTextSubmit}
+                  disabled={isLoading}
+                  className={'w-full'}
+                >
+                  <FaMicrophone />
+                </Button>
+              )}
             </Grid>
           </Box>
         </form>
