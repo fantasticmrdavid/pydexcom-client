@@ -13,7 +13,9 @@ import {
   Stack,
   Text,
 } from '@chakra-ui/react'
-import { FaMicrophone } from 'react-icons/fa'
+import { Tooltip } from '@/components/ui/tooltip'
+
+import { FaClipboard, FaMicrophone } from 'react-icons/fa'
 import Markdown from 'markdown-to-jsx'
 import './styles.css'
 
@@ -134,6 +136,12 @@ export default function Assistant() {
     }
 
     recognition.start()
+  }
+
+  const handleCopyToClipboard = () => {
+    navigator.clipboard.writeText(fullPrompt).catch((err) => {
+      console.error('Failed to copy: ', err)
+    })
   }
 
   const { responseJson } = data ? data : {}
@@ -273,8 +281,15 @@ export default function Assistant() {
             </Card.Root>
             <Card.Root my={4} className={'bg-white'}>
               <Card.Body gap="2">
-                <Card.Title>✏️ Full Prompt</Card.Title>
-                <Box fontSize="sm">
+                <Card.Title>
+                  ✏️ Full Prompt{' '}
+                  <Tooltip content={'Copy to clipboard'}>
+                    <Button onClick={handleCopyToClipboard} ml={2}>
+                      <FaClipboard />
+                    </Button>
+                  </Tooltip>
+                </Card.Title>
+                <Box fontSize="sm" display="flex" alignItems="flex-start">
                   <code>{fullPrompt}</code>
                 </Box>
               </Card.Body>
