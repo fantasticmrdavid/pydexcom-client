@@ -12,12 +12,22 @@ import {
   Grid,
   Stack,
   Text,
+  createListCollection,
 } from '@chakra-ui/react'
+import {
+  SelectContent,
+  SelectItem,
+  SelectLabel,
+  SelectRoot,
+  SelectTrigger,
+  SelectValueText,
+} from '@/components/ui/select'
 import { Tooltip } from '@/components/ui/tooltip'
 
 import { FaClipboard, FaMicrophone } from 'react-icons/fa'
 import Markdown from 'markdown-to-jsx'
 import './styles.css'
+import { systemPrompts } from '@/pages/api/ask/systemPrompts'
 
 declare global {
   interface Window {
@@ -27,6 +37,8 @@ declare global {
 }
 
 const DEFAULT_LOCATION = 'Ballan,AU'
+
+const DEFAULT_PURPOSE = 'meal'
 
 const trendDirectionIcons: { [key: string]: string } = {
   rising: '↑',
@@ -50,7 +62,11 @@ interface ResponseData {
       currentBGL: string
       trendDirection: string
     }
-    dosageBreakdown: {
+    dosageBreakdown?: {
+      step: string
+      detail: string
+    }[]
+    carbBreakdown?: {
       step: string
       detail: string
     }[]
@@ -61,13 +77,14 @@ interface ResponseData {
 async function fetchResponse(
   prompt: string,
   location: string,
+  purpose: string,
 ): Promise<ResponseData> {
   const res = await fetch('/api/ask', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ prompt, location }),
+    body: JSON.stringify({ prompt, location, purpose }),
     signal: AbortSignal.timeout(30 * 1000),
   })
   if (!res.ok) {
@@ -78,8 +95,16 @@ async function fetchResponse(
 }
 
 export default function Assistant() {
+  const purposeOptions = createListCollection({
+    items: Object.keys(systemPrompts).map((key) => ({
+      value: key,
+      label: systemPrompts[key as keyof typeof systemPrompts].label,
+    })),
+  })
+
   const [data, setData] = useState<ResponseData | null>(null)
   const [prompt, setPrompt] = useState('')
+  const [purpose, setPurpose] = useState(DEFAULT_PURPOSE)
   const [location] = useState(DEFAULT_LOCATION)
   const [fullPrompt, setFullPrompt] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -103,7 +128,7 @@ export default function Assistant() {
     event.preventDefault()
     setIsLoading(true)
     try {
-      const res = await fetchResponse(prompt, location)
+      const res = await fetchResponse(prompt, location, purpose)
       setData(res)
     } catch (error) {
       setError(error as Error)
@@ -123,7 +148,7 @@ export default function Assistant() {
       setPrompt(speechResult)
       setIsLoading(true)
       try {
-        const res = await fetchResponse(speechResult, location)
+        const res = await fetchResponse(speechResult, location, purpose)
         setData(res)
       } catch (error) {
         setError(error as Error)
@@ -156,6 +181,24 @@ export default function Assistant() {
           <h1 className={'text-[36px] font-bold'}>🦾 Betabot</h1>
         </Center>
         <form onSubmit={handleSubmit}>
+          <Box mb={4}>
+            <SelectRoot
+              collection={purposeOptions}
+              onValueChange={(option) => setPurpose(option.value[0])}
+            >
+              <SelectLabel>I want to:</SelectLabel>
+              <SelectTrigger>
+                <SelectValueText placeholder={'Select an option'} />
+              </SelectTrigger>
+              <SelectContent>
+                {purposeOptions.items.map((promptOption) => (
+                  <SelectItem item={promptOption} key={promptOption.value}>
+                    {promptOption.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </SelectRoot>
+          </Box>
           <Box mb={4}>
             <Textarea
               className={'bg-white'}
@@ -248,26 +291,50 @@ export default function Assistant() {
               </Card.Body>
               <Card.Footer />
             </Card.Root>
-            <Card.Root my={4} className={'bg-white'}>
-              <Card.Body gap="2">
-                <Card.Title>💉 Dosage Breakdown</Card.Title>
-                <Stack>
-                  {responseJson.dosageBreakdown.map((item) => (
-                    <HStack
-                      align={'start'}
-                      key={`dosageBreakdown_${item.step}`}
-                      mt="4"
-                    >
-                      <Text fontWeight="semibold">{item.step}:</Text>
-                      <Text color="fg.muted">
-                        <Markdown>{item.detail}</Markdown>
-                      </Text>
-                    </HStack>
-                  ))}
-                </Stack>
-              </Card.Body>
-              <Card.Footer />
-            </Card.Root>
+            {responseJson.dosageBreakdown && (
+              <Card.Root my={4} className={'bg-white'}>
+                <Card.Body gap="2">
+                  <Card.Title>💉 Dosage Breakdown</Card.Title>
+                  <Stack>
+                    {responseJson.dosageBreakdown.map((item) => (
+                      <HStack
+                        align={'start'}
+                        key={`dosageBreakdown_${item.step}`}
+                        mt="4"
+                      >
+                        <Text fontWeight="semibold">{item.step}:</Text>
+                        <Text color="fg.muted">
+                          <Markdown>{item.detail}</Markdown>
+                        </Text>
+                      </HStack>
+                    ))}
+                  </Stack>
+                </Card.Body>
+                <Card.Footer />
+              </Card.Root>
+            )}
+            {responseJson.carbBreakdown && (
+              <Card.Root my={4} className={'bg-white'}>
+                <Card.Body gap="2">
+                  <Card.Title>💉 Carb Breakdown</Card.Title>
+                  <Stack>
+                    {responseJson.carbBreakdown.map((item) => (
+                      <HStack
+                        align={'start'}
+                        key={`carbBreakdown_${item.step}`}
+                        mt="4"
+                      >
+                        <Text fontWeight="semibold">{item.step}:</Text>
+                        <Text color="fg.muted">
+                          <Markdown>{item.detail}</Markdown>
+                        </Text>
+                      </HStack>
+                    ))}
+                  </Stack>
+                </Card.Body>
+                <Card.Footer />
+              </Card.Root>
+            )}
             <Card.Root my={4} className={'bg-white'}>
               <Card.Body gap="2">
                 <Card.Title>🗒️ Notes</Card.Title>

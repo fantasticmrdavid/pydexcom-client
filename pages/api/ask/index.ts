@@ -3,7 +3,10 @@ import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import axios from 'axios'
 import OpenAI from 'openai'
-import { NORMALIZED_READING, normalizeNightscoutData } from './reading'
+import { NORMALIZED_READING, normalizeNightscoutData } from '../reading'
+
+import { systemPrompts } from './systemPrompts'
+import { responseSchemas } from './responseSchemas'
 
 export const maxDuration = 30 // Seconds
 
@@ -23,6 +26,14 @@ const fetchReadings = async () => {
       `Failed to fetch readings from ${NIGHTSCOUT_URL}: ${(error as Error).message}`,
     )
   }
+}
+
+export type Purpose = keyof typeof systemPrompts
+
+export interface RequestBody {
+  prompt: string
+  location: string
+  purpose: Purpose
 }
 
 const fetchWeather = async (location: string) => {
@@ -49,9 +60,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     return res.status(405).json({ message: 'Method not allowed' })
   }
 
-  const { prompt, location } = req.body
-  if (!prompt || !location) {
-    return res.status(400).json({ message: 'Prompt and location are required' })
+  const { prompt, location, purpose }: RequestBody = req.body
+  if (!prompt || !location || !purpose) {
+    return res
+      .status(400)
+      .json({ message: 'Prompt, location, and purpose are required' })
   }
 
   try {
@@ -67,32 +80,25 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const weatherContext = `**Weather (${location}): ${weather.weather[0].description}, Temperature: ${weather.main.temp}°C`
 
-    const fullPrompt = `You are an advanced Diabetes educator specializing in Type 1 diabetes and insulin pump therapy. I have T1 Diabetes and use a YpsoPump. ${prompt}. How should I dose my pump to keep BGL stable?
+    const fullPrompt = `You are an advanced Diabetes educator specializing in Type 1 diabetes and insulin pump therapy. I have T1 Diabetes and use a YpsoPump. ${prompt}.
 
-    **Guidelines:**  
-    - Use **Australian carb/nutrition data**, prioritizing the most recent and region-specific data Australian sources.
-    - Use **Android APS algorithm** and provided contextual data for calculations.
-    - Round all insulin dosage recommendations to the nearest 0.5. Round up if BGL is high or trending up, down if low or trending down. 
-    - Format response as follows:
-      1. **Final dosage recommendation** (slightly larger font).
-      2. **Clear, concise bullet points**.
-      3. Date/time in local timezone at ${location}. 
+    **System Prompt:**
+    ${systemPrompts[purpose].prompt}
     
     **Latest CGM Readings:**
     ${readingsContext}.
 
     **Context:**
-    ${weatherContext}.
-    **ISF:** ${process.env.INSULIN_SENSITIVITY_FACTOR}.
+    **Location:** ${location}.\n
+    ${weatherContext}.\n
+    **ISF:** ${process.env.INSULIN_SENSITIVITY_FACTOR}.\n
     **Carb Ratio:** ${process.env.INSULIN_TO_CARB_RATIO}.\n
     **Current time:** ${dayjs().format('HH:mm')}.\n
     Bedtime: 10pm.\n
     Target bedtime BGL: ${process.env.TARGET_BGL_BEDTIME}.\n
     
     **Response Schema:**
-    - **finalRecommendation:** Break down the final dosage into **preBolus** and **extendedBolus**. Also include the current **BGL** and **trend direction**.
-    - **dosageBreakdown:** Provide a detailed breakdown of the dosage broken down into **step** and **detail**. Format all numerical values in bold markdown for this section only. Explain when Android APS algorithm has been used.
-    - **notes:** Include any additional notes or considerations.
+    ${responseSchemas[purpose]}
     
     **Return in JSON format as per the above Response Schema**`
 
