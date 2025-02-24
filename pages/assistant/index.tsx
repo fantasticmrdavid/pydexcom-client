@@ -36,16 +36,18 @@ declare global {
   }
 }
 
+type systemPromptOption = keyof typeof systemPrompts
+
 const DEFAULT_LOCATION = 'Ballan,AU'
 
-const DEFAULT_PURPOSE = 'meal'
+const DEFAULT_PURPOSE: systemPromptOption = 'plannedActivity'
 
 const trendDirectionIcons: { [key: string]: string } = {
   rising: '↑',
   dropping: '↓',
-  Stable: '→',
-  Increasing: '↗',
-  Decreasing: '↘',
+  stable: '→',
+  increasing: '↗',
+  decreasing: '↘',
   'rapidly rising': '⇈',
   'rapidly dropping': '⇊',
 }
@@ -57,6 +59,8 @@ interface ResponseData {
   weatherContext: string
   responseJson: {
     finalRecommendation: {
+      fastCarbs?: string
+      slowCarbs?: string
       preBolus: string
       extendedBolus: string
       currentBGL: string
@@ -104,7 +108,8 @@ export default function Assistant() {
 
   const [data, setData] = useState<ResponseData | null>(null)
   const [prompt, setPrompt] = useState('')
-  const [purpose, setPurpose] = useState(DEFAULT_PURPOSE)
+  const [purpose, setPurpose] =
+    useState<keyof typeof systemPrompts>(DEFAULT_PURPOSE)
   const [location] = useState(DEFAULT_LOCATION)
   const [fullPrompt, setFullPrompt] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -184,7 +189,10 @@ export default function Assistant() {
           <Box mb={4}>
             <SelectRoot
               collection={purposeOptions}
-              onValueChange={(option) => setPurpose(option.value[0])}
+              onValueChange={(option) =>
+                setPurpose(option.value[0] as systemPromptOption)
+              }
+              defaultValue={[purpose]}
             >
               <SelectLabel>I want to:</SelectLabel>
               <SelectTrigger>
@@ -266,7 +274,7 @@ export default function Assistant() {
                       {responseJson.finalRecommendation.currentBGL}
                       {
                         trendDirectionIcons[
-                          responseJson.finalRecommendation.trendDirection
+                          responseJson.finalRecommendation.trendDirection.toLowerCase()
                         ]
                       }
                     </Text>
@@ -287,6 +295,26 @@ export default function Assistant() {
                       {responseJson.finalRecommendation.extendedBolus}
                     </Text>
                   </HStack>
+                  {responseJson.finalRecommendation.fastCarbs && (
+                    <HStack mt="4" align={'start'}>
+                      <Text fontSize={'lg'} fontWeight="semibold">
+                        Fast Carbs:
+                      </Text>
+                      <Text fontSize={'lg'} color="fg.muted">
+                        {responseJson.finalRecommendation.fastCarbs}
+                      </Text>
+                    </HStack>
+                  )}
+                  {responseJson.finalRecommendation.slowCarbs && (
+                    <HStack mt="4" align={'start'}>
+                      <Text fontSize={'lg'} fontWeight="semibold">
+                        Slow Carbs:
+                      </Text>
+                      <Text fontSize={'lg'} color="fg.muted">
+                        {responseJson.finalRecommendation.slowCarbs}
+                      </Text>
+                    </HStack>
+                  )}
                 </Box>
               </Card.Body>
               <Card.Footer />
@@ -316,7 +344,7 @@ export default function Assistant() {
             {responseJson.carbBreakdown && (
               <Card.Root my={4} className={'bg-white'}>
                 <Card.Body gap="2">
-                  <Card.Title>💉 Carb Breakdown</Card.Title>
+                  <Card.Title>🍔 Carb Breakdown</Card.Title>
                   <Stack>
                     {responseJson.carbBreakdown.map((item) => (
                       <HStack
