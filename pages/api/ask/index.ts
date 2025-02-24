@@ -1,15 +1,14 @@
+import Ajv from 'ajv'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import axios from 'axios'
 import OpenAI from 'openai'
 import { NORMALIZED_READING, normalizeNightscoutData } from '../reading'
-
 import { systemPrompts } from './systemPrompts'
 import { responseSchemas } from './responseSchemas'
 
-export const maxDuration = 30 // Seconds
-
+const ajv = new Ajv()
 dayjs.extend(relativeTime)
 
 const fetchReadings = async () => {
@@ -80,11 +79,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const weatherContext = `**Weather (${location}): ${weather.weather[0].description}, Temperature: ${weather.main.temp}°C`
 
-    const fullPrompt = `You are an advanced Diabetes educator specializing in Type 1 diabetes and insulin pump therapy. I have T1 Diabetes and use a YpsoPump. ${prompt}.
+    const fullPrompt = `I have T1 Diabetes and use a YpsoPump. ${prompt}.
 
     **System Prompt:**
     ${systemPrompts[purpose].prompt}
-    
+
     **Latest CGM Readings:**
     ${readingsContext}.
 
@@ -96,10 +95,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     **Current time:** ${dayjs().format('HH:mm')}.\n
     Bedtime: 10pm.\n
     Target bedtime BGL: ${process.env.TARGET_BGL_BEDTIME}.\n
-    
+
     **Response Schema:**
-    ${responseSchemas[purpose]}
-    
+    ${JSON.stringify(responseSchemas[purpose], null, 2)}
+
     **Return in JSON format as per the above Response Schema**`
 
     const openai = new OpenAI({
@@ -112,7 +111,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         {
           role: 'system',
           content:
-            'You are a helpful assistant providing diabetes management advice.',
+            'You are an advanced Diabetes educator specializing in Type 1 diabetes and insulin pump therapy.',
         },
         { role: 'user', content: fullPrompt },
       ],
@@ -124,9 +123,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     })
 
     const message = chatGPTResponse.choices[0].message?.content || ''
-    const responseJson = JSON.parse(
-      chatGPTResponse.choices[0].message?.content || '{}',
-    )
+    const responseJson = JSON.parse(message || '{}')
+
+    const validate = ajv.compile(responseSchemas[purpose])
+    const valid = validate(responseJson)
+
+    if (!valid) {
+      return res.status(400).json({
+        message: 'Response does not conform to schema',
+        errors: validate.errors,
+      })
+    }
 
     res.status(200).json({
       ...chatGPTResponse,
