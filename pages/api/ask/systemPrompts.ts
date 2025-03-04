@@ -24,7 +24,7 @@ export const systemPrompts = {
       2. **Clear, concise bullet points**.`,
   },
   generalQuestion: {
-    label: 'General T1 Diabetes question',
+    label: 'Ask a general T1 Diabetes question',
     prompt: `Explain this in simple terms.
 
     **Guidelines:**  

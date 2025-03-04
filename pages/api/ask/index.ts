@@ -7,6 +7,7 @@ import OpenAI from 'openai'
 import { NORMALIZED_READING, normalizeNightscoutData } from '../reading'
 import { systemPrompts } from './systemPrompts'
 import { responseSchemas } from './responseSchemas'
+import { userPersonas } from './userPersonas'
 
 const ajv = new Ajv()
 dayjs.extend(relativeTime)
@@ -29,10 +30,13 @@ const fetchReadings = async () => {
 
 export type Purpose = keyof typeof systemPrompts
 
+export type UserPersona = keyof typeof userPersonas
+
 export interface RequestBody {
   prompt: string
   location: string
   purpose: Purpose
+  userPersona: UserPersona
 }
 
 const fetchWeather = async (location: string) => {
@@ -59,11 +63,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     return res.status(405).json({ message: 'Method not allowed' })
   }
 
-  const { prompt, location, purpose }: RequestBody = req.body
-  if (!prompt || !location || !purpose) {
-    return res
-      .status(400)
-      .json({ message: 'Prompt, location, and purpose are required' })
+  const { prompt, location, purpose, userPersona }: RequestBody = req.body
+  if (!prompt || !location || !purpose || !userPersona) {
+    return res.status(400).json({
+      message: 'Prompt, location, purpose, and userPersona are required',
+    })
   }
 
   try {
@@ -79,7 +83,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const weatherContext = `**Weather (${location}): ${weather.weather[0].description}, Temperature: ${weather.main.temp}°C`
 
-    const fullPrompt = `I have T1 Diabetes and use a YpsoPump. ${prompt}.
+    const fullPrompt = `${userPersonas[userPersona].prompt} ${prompt}.
 
     **System Prompt:**
     ${systemPrompts[purpose].prompt}

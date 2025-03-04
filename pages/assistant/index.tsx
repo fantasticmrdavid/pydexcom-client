@@ -8,6 +8,7 @@ import {
   Center,
   Card,
   Container,
+  Fieldset,
   HStack,
   Grid,
   Stack,
@@ -15,6 +16,7 @@ import {
   List,
   createListCollection,
 } from '@chakra-ui/react'
+import { Radio, RadioGroup } from '@/components/ui/radio'
 import {
   SelectContent,
   SelectItem,
@@ -29,6 +31,7 @@ import { FaClipboard, FaMicrophone } from 'react-icons/fa'
 import Markdown from 'markdown-to-jsx'
 import './styles.css'
 import { systemPrompts } from '@/pages/api/ask/systemPrompts'
+import { userPersonas } from '@/pages/api/ask/userPersonas'
 
 declare global {
   interface Window {
@@ -87,13 +90,14 @@ async function fetchResponse(
   prompt: string,
   location: string,
   purpose: string,
+  userPersona: string,
 ): Promise<ResponseData> {
   const res = await fetch('/api/ask', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ prompt, location, purpose }),
+    body: JSON.stringify({ prompt, location, purpose, userPersona }),
     signal: AbortSignal.timeout(30 * 1000),
   })
   if (!res.ok) {
@@ -111,12 +115,19 @@ export default function Assistant() {
     })),
   })
 
+  const userPersonaOptions = Object.keys(userPersonas).map((key) => ({
+    value: key,
+    label: userPersonas[key as keyof typeof userPersonas].label,
+  }))
+
   const [data, setData] = useState<ResponseData | null>(null)
   const [prompt, setPrompt] = useState('')
   const [purpose, setPurpose] =
     useState<keyof typeof systemPrompts>(DEFAULT_PURPOSE)
   const [location] = useState(DEFAULT_LOCATION)
   const [fullPrompt, setFullPrompt] = useState('')
+  const [userPersona, setUserPersona] =
+    useState<keyof typeof userPersonas>('carer')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
   const [hasSpeechRecognitionApi, setHasSpeechRecognitionApi] = useState(false)
@@ -138,7 +149,7 @@ export default function Assistant() {
     event.preventDefault()
     setIsLoading(true)
     try {
-      const res = await fetchResponse(prompt, location, purpose)
+      const res = await fetchResponse(prompt, location, purpose, userPersona)
       setError(null)
       setData(res)
     } catch (error) {
@@ -159,7 +170,12 @@ export default function Assistant() {
       setPrompt(speechResult)
       setIsLoading(true)
       try {
-        const res = await fetchResponse(speechResult, location, purpose)
+        const res = await fetchResponse(
+          speechResult,
+          location,
+          purpose,
+          userPersona,
+        )
         setData(res)
       } catch (error) {
         setError(error as Error)
@@ -193,6 +209,27 @@ export default function Assistant() {
         </Center>
         <form onSubmit={handleSubmit}>
           <Box mb={4}>
+            <Fieldset.Root>
+              <Fieldset.Legend>
+                <strong>I am a person who:</strong>
+              </Fieldset.Legend>
+              <RadioGroup
+                value={userPersona}
+                onValueChange={(e) => {
+                  setUserPersona(e.value as keyof typeof userPersonas)
+                }}
+              >
+                <HStack gap="6">
+                  {userPersonaOptions.map((option) => (
+                    <Radio key={option.value} value={option.value}>
+                      {option.label}
+                    </Radio>
+                  ))}
+                </HStack>
+              </RadioGroup>
+            </Fieldset.Root>
+          </Box>
+          <Box mb={4}>
             <SelectRoot
               collection={purposeOptions}
               onValueChange={(option) =>
@@ -200,7 +237,9 @@ export default function Assistant() {
               }
               defaultValue={[purpose]}
             >
-              <SelectLabel>I want to:</SelectLabel>
+              <SelectLabel>
+                <strong>And I want to:</strong>
+              </SelectLabel>
               <SelectTrigger>
                 <SelectValueText placeholder={'Select an option'} />
               </SelectTrigger>
