@@ -12,6 +12,7 @@ import {
   Grid,
   Stack,
   Text,
+  List,
   createListCollection,
 } from '@chakra-ui/react'
 import {
@@ -58,6 +59,10 @@ interface ResponseData {
   readingsContext: string
   weatherContext: string
   responseJson: {
+    answer: {
+      summary: string
+      keyPoints: string[]
+    }
     finalRecommendation: {
       fastCarbs?: string
       slowCarbs?: string
@@ -134,6 +139,7 @@ export default function Assistant() {
     setIsLoading(true)
     try {
       const res = await fetchResponse(prompt, location, purpose)
+      setError(null)
       setData(res)
     } catch (error) {
       setError(error as Error)
@@ -260,65 +266,91 @@ export default function Assistant() {
         )}
         {data && responseJson && !isLoading && (
           <>
-            <Card.Root my={4} className={'bg-[rgba(97,225,66,0.3)]'}>
-              <Card.Body gap="2">
-                <Card.Title fontSize={'x-large'}>
-                  🩸 Recommended Action
-                </Card.Title>
-                <Box>
-                  <HStack mt="4" align={'start'}>
-                    <Text fontSize={'lg'} fontWeight="semibold">
-                      Current BGL:
-                    </Text>
+            {responseJson.answer && (
+              <Card.Root my={4} className={'bg-[rgba(97,225,66,0.3)]'}>
+                <Card.Body gap="2">
+                  <Card.Title fontSize={'x-large'}>💬 Answer</Card.Title>
+                  <Box>
                     <Text fontSize={'lg'} color="fg.muted">
-                      {responseJson.finalRecommendation.currentBGL}
-                      {
-                        trendDirectionIcons[
-                          responseJson.finalRecommendation.trendDirection.toLowerCase()
-                        ]
-                      }
+                      {responseJson.answer.summary}
                     </Text>
-                  </HStack>
-                  <HStack mt="4" align={'start'}>
-                    <Text fontSize={'lg'} fontWeight="semibold">
-                      Pre-Bolus:
-                    </Text>
-                    <Text fontSize={'lg'} color="fg.muted">
-                      {responseJson.finalRecommendation.preBolus}
-                    </Text>
-                  </HStack>
-                  <HStack mt="4" align={'start'}>
-                    <Text fontSize={'lg'} fontWeight="semibold">
-                      Extended Bolus:
-                    </Text>
-                    <Text fontSize={'lg'} color="fg.muted">
-                      {responseJson.finalRecommendation.extendedBolus}
-                    </Text>
-                  </HStack>
-                  {responseJson.finalRecommendation.fastCarbs && (
+                  </Box>
+                  <List.Root>
+                    {responseJson.answer.keyPoints.map((item, index) => (
+                      <List.Item
+                        mt={4}
+                        color="fg.muted"
+                        key={`answer_keypoint_${index.toString()}`}
+                      >
+                        <Markdown>{item}</Markdown>
+                      </List.Item>
+                    ))}
+                  </List.Root>
+                </Card.Body>
+                <Card.Footer />
+              </Card.Root>
+            )}
+            {responseJson.finalRecommendation && (
+              <Card.Root my={4} className={'bg-[rgba(97,225,66,0.3)]'}>
+                <Card.Body gap="2">
+                  <Card.Title fontSize={'x-large'}>
+                    🩸 Recommended Action
+                  </Card.Title>
+                  <Box>
                     <HStack mt="4" align={'start'}>
                       <Text fontSize={'lg'} fontWeight="semibold">
-                        Fast Carbs:
+                        Current BGL:
                       </Text>
                       <Text fontSize={'lg'} color="fg.muted">
-                        {responseJson.finalRecommendation.fastCarbs}
+                        {responseJson.finalRecommendation.currentBGL}
+                        {
+                          trendDirectionIcons[
+                            responseJson.finalRecommendation.trendDirection.toLowerCase()
+                          ]
+                        }
                       </Text>
                     </HStack>
-                  )}
-                  {responseJson.finalRecommendation.slowCarbs && (
                     <HStack mt="4" align={'start'}>
                       <Text fontSize={'lg'} fontWeight="semibold">
-                        Slow Carbs:
+                        Pre-Bolus:
                       </Text>
                       <Text fontSize={'lg'} color="fg.muted">
-                        {responseJson.finalRecommendation.slowCarbs}
+                        {responseJson.finalRecommendation.preBolus}
                       </Text>
                     </HStack>
-                  )}
-                </Box>
-              </Card.Body>
-              <Card.Footer />
-            </Card.Root>
+                    <HStack mt="4" align={'start'}>
+                      <Text fontSize={'lg'} fontWeight="semibold">
+                        Extended Bolus:
+                      </Text>
+                      <Text fontSize={'lg'} color="fg.muted">
+                        {responseJson.finalRecommendation.extendedBolus}
+                      </Text>
+                    </HStack>
+                    {responseJson.finalRecommendation.fastCarbs && (
+                      <HStack mt="4" align={'start'}>
+                        <Text fontSize={'lg'} fontWeight="semibold">
+                          Fast Carbs:
+                        </Text>
+                        <Text fontSize={'lg'} color="fg.muted">
+                          {responseJson.finalRecommendation.fastCarbs}
+                        </Text>
+                      </HStack>
+                    )}
+                    {responseJson.finalRecommendation.slowCarbs && (
+                      <HStack mt="4" align={'start'}>
+                        <Text fontSize={'lg'} fontWeight="semibold">
+                          Slow Carbs:
+                        </Text>
+                        <Text fontSize={'lg'} color="fg.muted">
+                          {responseJson.finalRecommendation.slowCarbs}
+                        </Text>
+                      </HStack>
+                    )}
+                  </Box>
+                </Card.Body>
+                <Card.Footer />
+              </Card.Root>
+            )}
             {responseJson.dosageBreakdown && (
               <Card.Root my={4} className={'bg-white'}>
                 <Card.Body gap="2">

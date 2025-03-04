@@ -96,4 +96,18 @@ export const responseSchemas = {
       'notes',
     ],
   },
+  generalQuestion: {
+    type: 'object',
+    properties: {
+      answer: {
+        type: 'object',
+        properties: {
+          summary: { type: 'string' },
+          keyPoints: { type: 'array', items: { type: 'string' } },
+        },
+      },
+      notes: { type: 'string' },
+    },
+    required: ['answer', 'notes'],
+  },
 }
