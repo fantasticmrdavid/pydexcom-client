@@ -84,8 +84,8 @@ importers:
         specifier: 18.3.1
         version: 18.3.1(react@18.3.1)
       react-google-charts:
-        specifier: ^4.0.1
-        version: 4.0.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^5.0.0
+        version: 5.2.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-icons:
         specifier: ^5.4.0
         version: 5.5.0(react@18.3.1)
@@ -2068,8 +2068,8 @@ packages:
     peerDependencies:
       react: ^18.3.1
 
-  react-google-charts@4.0.7:
-    resolution: {integrity: sha512-u1HHEaFvjYrO4r5tnVic7Zl+p7rZKqq6ukLY7E4qdIREN7MPiBBMVRmfUpuWHCQw5aFLRoK+EAHi0c7ub8CW3A==}
+  react-google-charts@5.2.1:
+    resolution: {integrity: sha512-mCbPiObP8yWM5A9ogej7Qp3/HX4EzOwuEzUYvcfHtL98Xt4V/brD14KgfDzSNNtyD48MNXCpq5oVaYKt0ykQUQ==}
     peerDependencies:
       react: '>=16.3.0'
       react-dom: '>=16.3.0'
@@ -4915,7 +4915,7 @@ snapshots:
       react: 18.3.1
       scheduler: 0.23.2
 
-  react-google-charts@4.0.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  react-google-charts@5.2.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
