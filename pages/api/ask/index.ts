@@ -42,18 +42,31 @@ export interface RequestBody {
 const fetchWeather = async (location: string) => {
   const { OPENWEATHERMAP_API_KEY } = process.env
   const url = `https://api.openweathermap.org/data/2.5/weather`
+
+  // match "lat,lon" (e.g. "12.34,-56.78")
+  const coordMatch = location.match(/^(-?\d+(\.\d+)?),\s*(-?\d+(\.\d+)?)$/)
+
+  const params: Record<string, string | number> = {
+    appid: OPENWEATHERMAP_API_KEY!,
+    units: 'metric',
+  }
+
+  if (coordMatch) {
+    const [, lat, , lon] = coordMatch
+    params.lat = parseFloat(lat)
+    params.lon = parseFloat(lon)
+  } else {
+    params.q = location
+  }
+
   try {
-    const response = await axios.get(url, {
-      params: {
-        q: location,
-        appid: OPENWEATHERMAP_API_KEY,
-        units: 'metric',
-      },
-    })
+    const response = await axios.get(url, { params })
     return response.data
   } catch (error) {
     throw new Error(
-      `Failed to fetch weather from ${url} for location ${location}: ${(error as Error).message}`,
+      `Failed to fetch weather from ${url} for location ${location}: ${
+        (error as Error).message
+      }, params: ${JSON.stringify(params)}`,
     )
   }
 }

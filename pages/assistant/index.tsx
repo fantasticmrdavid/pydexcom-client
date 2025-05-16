@@ -43,7 +43,9 @@ declare global {
 
 type systemPromptOption = keyof typeof systemPrompts
 
-const DEFAULT_LOCATION = 'Ballan 3342, VIC, AU'
+type LocationSource = 'device' | 'manual'
+
+const DEFAULT_LOCATION = 'Ballan, VIC, AU'
 
 const DEFAULT_PURPOSE: systemPromptOption = 'plannedActivity'
 
@@ -126,11 +128,10 @@ export default function Assistant() {
   const [purpose, setPurpose] =
     useState<keyof typeof systemPrompts>(DEFAULT_PURPOSE)
 
-  const [locationMethod, setLocationMethod] = useState<'device' | 'manual'>(
-    'manual',
-  )
+  const [locationMethod, setLocationMethod] = useState<LocationSource>('manual')
   const [manualLocation, setManualLocation] = useState(DEFAULT_LOCATION)
   const [detectedLocation, setDetectedLocation] = useState('')
+  const [detectedLocationName, setDetectedLocationName] = useState('')
 
   const [fullPrompt, setFullPrompt] = useState('')
   const [userPersona, setUserPersona] =
@@ -154,9 +155,28 @@ export default function Assistant() {
 
   const handleDetectLocation = () => {
     if (!navigator.geolocation) return
+
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setDetectedLocation(`${pos.coords.latitude},${pos.coords.longitude}`)
+      async (pos) => {
+        const { latitude, longitude } = pos.coords
+        try {
+          const res = await fetch(
+            `/api/reverseGeocode?lat=${latitude}&lon=${longitude}`,
+          )
+          if (!res.ok) throw new Error('Reverse geocoding failed')
+          const data = await res.json()
+          if ('error' in data) throw new Error(data.error)
+
+          const { city, state, country } = data
+          const locationString = [city, state, country]
+            .filter(Boolean)
+            .join(', ')
+          setDetectedLocation(`${latitude},${longitude}`)
+          setDetectedLocationName(locationString)
+        } catch (err) {
+          console.error('Reverse geocoding error', err)
+          setDetectedLocation(`${latitude},${longitude}`)
+        }
       },
       (err) => console.error('Geo error', err),
     )
@@ -165,11 +185,10 @@ export default function Assistant() {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
     setIsLoading(true)
-    const location =
-      locationMethod === 'device' ? detectedLocation : manualLocation
+    const loc = locationMethod === 'device' ? detectedLocation : manualLocation
 
     try {
-      const res = await fetchResponse(prompt, location, purpose, userPersona)
+      const res = await fetchResponse(prompt, loc, purpose, userPersona)
       setError(null)
       setData(res)
     } catch (error) {
@@ -185,17 +204,14 @@ export default function Assistant() {
     recognition.interimResults = false
     recognition.lang = 'en-au'
 
+    const loc = locationMethod === 'device' ? detectedLocation : manualLocation
+
     recognition.onresult = async (event: SpeechRecognitionEvent) => {
       const speechResult = event.results[0][0].transcript
       setPrompt(speechResult)
       setIsLoading(true)
       try {
-        const res = await fetchResponse(
-          speechResult,
-          location,
-          purpose,
-          userPersona,
-        )
+        const res = await fetchResponse(speechResult, loc, purpose, userPersona)
         setData(res)
       } catch (error) {
         setError(error as Error)
@@ -279,8 +295,8 @@ export default function Assistant() {
               </Fieldset.Legend>
               <RadioGroup
                 value={locationMethod}
-                onValueChange={(val) =>
-                  setLocationMethod(val as 'device' | 'manual')
+                onValueChange={({ value }) =>
+                  setLocationMethod(value as LocationSource)
                 }
               >
                 <HStack gap="6">
@@ -302,7 +318,7 @@ export default function Assistant() {
               )}
               {locationMethod === 'device' && detectedLocation && (
                 <Text mt={2} fontSize="sm" color="fg.muted">
-                  Detected: {detectedLocation}
+                  Detected: {detectedLocationName} ({detectedLocation})
                 </Text>
               )}
             </Fieldset.Root>
