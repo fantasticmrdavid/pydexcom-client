@@ -10,6 +10,7 @@ import {
   Container,
   Fieldset,
   HStack,
+  Input,
   Grid,
   Stack,
   Text,
@@ -42,7 +43,7 @@ declare global {
 
 type systemPromptOption = keyof typeof systemPrompts
 
-const DEFAULT_LOCATION = 'Ballan,AU'
+const DEFAULT_LOCATION = 'Ballan 3342, VIC, AU'
 
 const DEFAULT_PURPOSE: systemPromptOption = 'plannedActivity'
 
@@ -124,7 +125,13 @@ export default function Assistant() {
   const [prompt, setPrompt] = useState('')
   const [purpose, setPurpose] =
     useState<keyof typeof systemPrompts>(DEFAULT_PURPOSE)
-  const [location] = useState(DEFAULT_LOCATION)
+
+  const [locationMethod, setLocationMethod] = useState<'device' | 'manual'>(
+    'manual',
+  )
+  const [manualLocation, setManualLocation] = useState(DEFAULT_LOCATION)
+  const [detectedLocation, setDetectedLocation] = useState('')
+
   const [fullPrompt, setFullPrompt] = useState('')
   const [userPersona, setUserPersona] =
     useState<keyof typeof userPersonas>('carer')
@@ -145,9 +152,22 @@ export default function Assistant() {
     )
   }, [])
 
+  const handleDetectLocation = () => {
+    if (!navigator.geolocation) return
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setDetectedLocation(`${pos.coords.latitude},${pos.coords.longitude}`)
+      },
+      (err) => console.error('Geo error', err),
+    )
+  }
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
     setIsLoading(true)
+    const location =
+      locationMethod === 'device' ? detectedLocation : manualLocation
+
     try {
       const res = await fetchResponse(prompt, location, purpose, userPersona)
       setError(null)
@@ -253,6 +273,41 @@ export default function Assistant() {
             </SelectRoot>
           </Box>
           <Box mb={4}>
+            <Fieldset.Root>
+              <Fieldset.Legend>
+                <strong>Current Location:</strong>
+              </Fieldset.Legend>
+              <RadioGroup
+                value={locationMethod}
+                onValueChange={(val) =>
+                  setLocationMethod(val as 'device' | 'manual')
+                }
+              >
+                <HStack gap="6">
+                  <Radio value="device">Use Device</Radio>
+                  <Radio value="manual">Enter Manually</Radio>
+                </HStack>
+              </RadioGroup>
+              {locationMethod === 'device' ? (
+                <Button mt={2} onClick={handleDetectLocation}>
+                  Detect Location
+                </Button>
+              ) : (
+                <Input
+                  mt={2}
+                  value={manualLocation}
+                  onChange={(e) => setManualLocation(e.target.value)}
+                  placeholder="City,Country or lat,lng"
+                />
+              )}
+              {locationMethod === 'device' && detectedLocation && (
+                <Text mt={2} fontSize="sm" color="fg.muted">
+                  Detected: {detectedLocation}
+                </Text>
+              )}
+            </Fieldset.Root>
+          </Box>
+          <Box mb={4}>
             <Textarea
               className={'bg-white'}
               value={prompt}
@@ -337,7 +392,11 @@ export default function Assistant() {
                   </Card.Title>
                   <Box>
                     <HStack mt="4" align={'start'}>
-                      <Text fontSize={'lg'} fontWeight="semibold">
+                      <Text
+                        fontSize={'lg'}
+                        fontWeight="semibold"
+                        whiteSpace="nowrap"
+                      >
                         Current BGL:
                       </Text>
                       <Text fontSize={'lg'} color="fg.muted">
@@ -350,7 +409,11 @@ export default function Assistant() {
                       </Text>
                     </HStack>
                     <HStack mt="4" align={'start'}>
-                      <Text fontSize={'lg'} fontWeight="semibold">
+                      <Text
+                        fontSize={'lg'}
+                        fontWeight="semibold"
+                        whiteSpace="nowrap"
+                      >
                         Pre-Bolus:
                       </Text>
                       <Text fontSize={'lg'} color="fg.muted">
@@ -358,7 +421,11 @@ export default function Assistant() {
                       </Text>
                     </HStack>
                     <HStack mt="4" align={'start'}>
-                      <Text fontSize={'lg'} fontWeight="semibold">
+                      <Text
+                        fontSize={'lg'}
+                        fontWeight="semibold"
+                        whiteSpace="nowrap"
+                      >
                         Extended Bolus:
                       </Text>
                       <Text fontSize={'lg'} color="fg.muted">
@@ -367,7 +434,11 @@ export default function Assistant() {
                     </HStack>
                     {responseJson.finalRecommendation.fastCarbs && (
                       <HStack mt="4" align={'start'}>
-                        <Text fontSize={'lg'} fontWeight="semibold">
+                        <Text
+                          fontSize={'lg'}
+                          fontWeight="semibold"
+                          whiteSpace="nowrap"
+                        >
                           Fast Carbs:
                         </Text>
                         <Text fontSize={'lg'} color="fg.muted">
@@ -401,7 +472,9 @@ export default function Assistant() {
                         key={`dosageBreakdown_${item.step}`}
                         mt="4"
                       >
-                        <Text fontWeight="semibold">{item.step}:</Text>
+                        <Text fontWeight="semibold" whiteSpace="nowrap">
+                          {item.step}:
+                        </Text>
                         <Text color="fg.muted">
                           <Markdown>{item.detail}</Markdown>
                         </Text>
@@ -423,7 +496,9 @@ export default function Assistant() {
                         key={`carbBreakdown_${item.step}`}
                         mt="4"
                       >
-                        <Text fontWeight="semibold">{item.step}:</Text>
+                        <Text fontWeight="semibold" whiteSpace="nowrap">
+                          {item.step}:
+                        </Text>
                         <Text color="fg.muted">
                           <Markdown>{item.detail}</Markdown>
                         </Text>

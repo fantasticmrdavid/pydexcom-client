@@ -77,18 +77,18 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const readingsContext = readings
       .map(
         (reading: NORMALIZED_READING) =>
-          `Time: ${reading.last_cgm_reading}, Value: ${reading.mmol_l.toFixed(2)}`,
+          `T: ${dayjs().diff(dayjs(reading.last_cgm_reading), 'minute')}, V: ${reading.mmol_l.toFixed(1)}`,
       )
       .join('\n')
 
-    const weatherContext = `**Weather (${location}): ${weather.weather[0].description}, Temperature: ${weather.main.temp}°C`
+    const weatherContext = `**Weather (${location}):** ${weather.weather[0].description}, Temperature: ${weather.main.temp}°C`
 
     const fullPrompt = `${userPersonas[userPersona].prompt} ${prompt}.
 
     **System Prompt:**
     ${systemPrompts[purpose].prompt}
 
-    **Latest CGM Readings:**
+    **Latest CGM Readings in relative time from now:**
     ${readingsContext}.
 
     **Context:**
@@ -97,8 +97,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     **ISF:** ${process.env.INSULIN_SENSITIVITY_FACTOR}.\n
     **Carb Ratio:** ${process.env.INSULIN_TO_CARB_RATIO}.\n
     **Current time:** ${dayjs().format('HH:mm')}.\n
-    Bedtime: 10pm.\n
-    Target bedtime BGL: ${process.env.TARGET_BGL_BEDTIME}.\n
+    **Bedtime:** ${process.env.TARGET_TIME_BEDTIME}.\n
+    **Target bedtime BGL:** ${process.env.TARGET_BGL_BEDTIME}.\n
 
     **Response Schema:**
     ${JSON.stringify(responseSchemas[purpose], null, 2)}
@@ -110,7 +110,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     })
 
     const chatGPTResponse = await openai.chat.completions.create({
-      model: 'gpt-4-turbo',
+      model: 'gpt-4.1',
       messages: [
         {
           role: 'system',
