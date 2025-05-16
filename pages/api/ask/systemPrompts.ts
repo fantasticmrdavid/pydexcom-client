@@ -6,7 +6,8 @@ export const systemPrompts = {
     **Guidelines:**  
     - Use **Australian carb/nutrition data**, prioritizing the most recent and region-specific data Australian sources.
     - Use **Android APS algorithm** and provided contextual data for calculations.
-    - Round all insulin dosage recommendations to the nearest 0.5. Round up if BGL is high or trending up, down if low or trending down. 
+    - Round all insulin dosage recommendations to the nearest 0.5. Round up if BGL is high or trending up, down if low or trending down.
+    - Use fingerprick BGL data if available, otherwise use CGM data.
     - Format response as follows:
       1. **Recommended actions**.
       2. **Clear, concise bullet points**.`,
@@ -18,7 +19,8 @@ export const systemPrompts = {
     **Guidelines:**  
     - Use **Australian carb/nutrition data**, prioritizing the most recent and region-specific data Australian sources.
     - Use **Android APS algorithm** and provided contextual data for calculations.
-    - Round all insulin dosage recommendations to the nearest 0.5. Round up if BGL is high or trending up, down if low or trending down. 
+    - Round all insulin dosage recommendations to the nearest 0.5. Round up if BGL is high or trending up, down if low or trending down.
+    - Use fingerprick BGL data if available, otherwise use CGM data. 
     - Format response as follows:
       1. **Final dosage recommendation**.
       2. **Clear, concise bullet points**.`,
@@ -30,7 +32,8 @@ export const systemPrompts = {
     **Guidelines:**  
     - Use **Australian carb/nutrition data**, prioritizing the most recent and region-specific data Australian sources.
     - Use **Android APS algorithm** and provided contextual data for calculations.
-    - Round all insulin dosage recommendations to the nearest 0.5. Round up if BGL is high or trending up, down if low or trending down. 
+    - Round all insulin dosage recommendations to the nearest 0.5. Round up if BGL is high or trending up, down if low or trending down.
+    - Use fingerprick BGL data if available, otherwise use CGM data. 
     - Format response as follows:
       1. **Answer**.
       2. **Answer summary key points**

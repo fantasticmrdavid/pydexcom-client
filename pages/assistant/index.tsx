@@ -4,17 +4,13 @@ import {
   Box,
   Button,
   Textarea,
-  Alert,
   Center,
-  Card,
   Container,
   Fieldset,
   HStack,
   Input,
   Grid,
-  Stack,
   Text,
-  List,
   createListCollection,
 } from '@chakra-ui/react'
 import { Radio, RadioGroup } from '@/components/ui/radio'
@@ -26,10 +22,9 @@ import {
   SelectTrigger,
   SelectValueText,
 } from '@/components/ui/select'
-import { Tooltip } from '@/components/ui/tooltip'
+import { Responses } from '@/app/components/Assistant/Responses'
 
-import { FaClipboard, FaMicrophone } from 'react-icons/fa'
-import Markdown from 'markdown-to-jsx'
+import { FaMicrophone } from 'react-icons/fa'
 import './styles.css'
 import { systemPrompts } from '@/pages/api/ask/systemPrompts'
 import { userPersonas } from '@/pages/api/ask/userPersonas'
@@ -48,16 +43,6 @@ type LocationSource = 'device' | 'manual'
 const DEFAULT_LOCATION = 'Ballan, VIC, AU'
 
 const DEFAULT_PURPOSE: systemPromptOption = 'plannedActivity'
-
-const trendDirectionIcons: { [key: string]: string } = {
-  rising: '↑',
-  dropping: '↓',
-  stable: '→',
-  increasing: '↗',
-  decreasing: '↘',
-  'rapidly rising': '⇈',
-  'rapidly dropping': '⇊',
-}
 
 interface ResponseData {
   message: string
@@ -94,13 +79,14 @@ async function fetchResponse(
   location: string,
   purpose: string,
   userPersona: string,
+  actualBGL?: number,
 ): Promise<ResponseData> {
   const res = await fetch('/api/ask', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ prompt, location, purpose, userPersona }),
+    body: JSON.stringify({ prompt, location, purpose, userPersona, actualBGL }),
     signal: AbortSignal.timeout(30 * 1000),
   })
   if (!res.ok) {
@@ -118,11 +104,6 @@ export default function Assistant() {
     })),
   })
 
-  const userPersonaOptions = Object.keys(userPersonas).map((key) => ({
-    value: key,
-    label: userPersonas[key as keyof typeof userPersonas].label,
-  }))
-
   const [data, setData] = useState<ResponseData | null>(null)
   const [prompt, setPrompt] = useState('')
   const [purpose, setPurpose] =
@@ -133,9 +114,10 @@ export default function Assistant() {
   const [detectedLocation, setDetectedLocation] = useState('')
   const [detectedLocationName, setDetectedLocationName] = useState('')
 
+  const [actualBglReading, setActualBglReading] = useState<number>()
+
   const [fullPrompt, setFullPrompt] = useState('')
-  const [userPersona, setUserPersona] =
-    useState<keyof typeof userPersonas>('carer')
+  const [userPersona] = useState<keyof typeof userPersonas>('patient')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
   const [hasSpeechRecognitionApi, setHasSpeechRecognitionApi] = useState(false)
@@ -188,7 +170,13 @@ export default function Assistant() {
     const loc = locationMethod === 'device' ? detectedLocation : manualLocation
 
     try {
-      const res = await fetchResponse(prompt, loc, purpose, userPersona)
+      const res = await fetchResponse(
+        prompt,
+        loc,
+        purpose,
+        userPersona,
+        actualBglReading || undefined,
+      )
       setError(null)
       setData(res)
     } catch (error) {
@@ -211,7 +199,13 @@ export default function Assistant() {
       setPrompt(speechResult)
       setIsLoading(true)
       try {
-        const res = await fetchResponse(speechResult, loc, purpose, userPersona)
+        const res = await fetchResponse(
+          speechResult,
+          loc,
+          purpose,
+          userPersona,
+          actualBglReading,
+        )
         setData(res)
       } catch (error) {
         setError(error as Error)
@@ -232,8 +226,6 @@ export default function Assistant() {
     })
   }
 
-  const { responseJson } = data ? data : {}
-
   return (
     <>
       <Head>
@@ -245,27 +237,6 @@ export default function Assistant() {
         </Center>
         <form onSubmit={handleSubmit}>
           <Box mb={4}>
-            <Fieldset.Root>
-              <Fieldset.Legend>
-                <strong>I am a person who:</strong>
-              </Fieldset.Legend>
-              <RadioGroup
-                value={userPersona}
-                onValueChange={(e) => {
-                  setUserPersona(e.value as keyof typeof userPersonas)
-                }}
-              >
-                <HStack gap="6">
-                  {userPersonaOptions.map((option) => (
-                    <Radio key={option.value} value={option.value}>
-                      {option.label}
-                    </Radio>
-                  ))}
-                </HStack>
-              </RadioGroup>
-            </Fieldset.Root>
-          </Box>
-          <Box mb={4}>
             <SelectRoot
               collection={purposeOptions}
               onValueChange={(option) =>
@@ -274,7 +245,7 @@ export default function Assistant() {
               defaultValue={[purpose]}
             >
               <SelectLabel>
-                <strong>And I want to:</strong>
+                <strong>I want to:</strong>
               </SelectLabel>
               <SelectTrigger>
                 <SelectValueText placeholder={'Select an option'} />
@@ -324,6 +295,23 @@ export default function Assistant() {
             </Fieldset.Root>
           </Box>
           <Box mb={4}>
+            <Fieldset.Root>
+              <Fieldset.Legend>
+                <strong>Actual BGL (mmol) from blood test:</strong>
+              </Fieldset.Legend>
+              <Input
+                type="number"
+                step="0.1"
+                value={actualBglReading ?? ''}
+                onChange={(e) => {
+                  const val = e.target.value
+                  setActualBglReading(val ? parseFloat(val) : undefined)
+                }}
+                placeholder="e.g. 5.5"
+              />
+            </Fieldset.Root>
+          </Box>
+          <Box mb={4}>
             <Textarea
               className={'bg-white'}
               value={prompt}
@@ -368,191 +356,12 @@ export default function Assistant() {
             </Grid>
           </Box>
         </form>
-        {error && (
-          <Alert.Root status="error" mt={4}>
-            <Alert.Indicator />
-            <Alert.Title>{error.message}</Alert.Title>
-          </Alert.Root>
-        )}
-        {data && responseJson && !isLoading && (
-          <>
-            {responseJson.answer && (
-              <Card.Root my={4} className={'bg-[rgba(97,225,66,0.3)]'}>
-                <Card.Body gap="2">
-                  <Card.Title fontSize={'x-large'}>💬 Answer</Card.Title>
-                  <Box>
-                    <Text fontSize={'lg'} color="fg.muted">
-                      {responseJson.answer.summary}
-                    </Text>
-                  </Box>
-                  <List.Root>
-                    {responseJson.answer.keyPoints.map((item, index) => (
-                      <List.Item
-                        mt={4}
-                        color="fg.muted"
-                        key={`answer_keypoint_${index.toString()}`}
-                      >
-                        <Markdown>{item}</Markdown>
-                      </List.Item>
-                    ))}
-                  </List.Root>
-                </Card.Body>
-                <Card.Footer />
-              </Card.Root>
-            )}
-            {responseJson.finalRecommendation && (
-              <Card.Root my={4} className={'bg-[rgba(97,225,66,0.3)]'}>
-                <Card.Body gap="2">
-                  <Card.Title fontSize={'x-large'}>
-                    🩸 Recommended Action
-                  </Card.Title>
-                  <Box>
-                    <HStack mt="4" align={'start'}>
-                      <Text
-                        fontSize={'lg'}
-                        fontWeight="semibold"
-                        whiteSpace="nowrap"
-                      >
-                        Current BGL:
-                      </Text>
-                      <Text fontSize={'lg'} color="fg.muted">
-                        {responseJson.finalRecommendation.currentBGL}
-                        {
-                          trendDirectionIcons[
-                            responseJson.finalRecommendation.trendDirection.toLowerCase()
-                          ]
-                        }
-                      </Text>
-                    </HStack>
-                    <HStack mt="4" align={'start'}>
-                      <Text
-                        fontSize={'lg'}
-                        fontWeight="semibold"
-                        whiteSpace="nowrap"
-                      >
-                        Pre-Bolus:
-                      </Text>
-                      <Text fontSize={'lg'} color="fg.muted">
-                        {responseJson.finalRecommendation.preBolus}
-                      </Text>
-                    </HStack>
-                    <HStack mt="4" align={'start'}>
-                      <Text
-                        fontSize={'lg'}
-                        fontWeight="semibold"
-                        whiteSpace="nowrap"
-                      >
-                        Extended Bolus:
-                      </Text>
-                      <Text fontSize={'lg'} color="fg.muted">
-                        {responseJson.finalRecommendation.extendedBolus}
-                      </Text>
-                    </HStack>
-                    {responseJson.finalRecommendation.fastCarbs && (
-                      <HStack mt="4" align={'start'}>
-                        <Text
-                          fontSize={'lg'}
-                          fontWeight="semibold"
-                          whiteSpace="nowrap"
-                        >
-                          Fast Carbs:
-                        </Text>
-                        <Text fontSize={'lg'} color="fg.muted">
-                          {responseJson.finalRecommendation.fastCarbs}
-                        </Text>
-                      </HStack>
-                    )}
-                    {responseJson.finalRecommendation.slowCarbs && (
-                      <HStack mt="4" align={'start'}>
-                        <Text fontSize={'lg'} fontWeight="semibold">
-                          Slow Carbs:
-                        </Text>
-                        <Text fontSize={'lg'} color="fg.muted">
-                          {responseJson.finalRecommendation.slowCarbs}
-                        </Text>
-                      </HStack>
-                    )}
-                  </Box>
-                </Card.Body>
-                <Card.Footer />
-              </Card.Root>
-            )}
-            {responseJson.dosageBreakdown && (
-              <Card.Root my={4} className={'bg-white'}>
-                <Card.Body gap="2">
-                  <Card.Title>💉 Dosage Breakdown</Card.Title>
-                  <Stack>
-                    {responseJson.dosageBreakdown.map((item) => (
-                      <HStack
-                        align={'start'}
-                        key={`dosageBreakdown_${item.step}`}
-                        mt="4"
-                      >
-                        <Text fontWeight="semibold" whiteSpace="nowrap">
-                          {item.step}:
-                        </Text>
-                        <Text color="fg.muted">
-                          <Markdown>{item.detail}</Markdown>
-                        </Text>
-                      </HStack>
-                    ))}
-                  </Stack>
-                </Card.Body>
-                <Card.Footer />
-              </Card.Root>
-            )}
-            {responseJson.carbBreakdown && (
-              <Card.Root my={4} className={'bg-white'}>
-                <Card.Body gap="2">
-                  <Card.Title>🍔 Carb Breakdown</Card.Title>
-                  <Stack>
-                    {responseJson.carbBreakdown.map((item) => (
-                      <HStack
-                        align={'start'}
-                        key={`carbBreakdown_${item.step}`}
-                        mt="4"
-                      >
-                        <Text fontWeight="semibold" whiteSpace="nowrap">
-                          {item.step}:
-                        </Text>
-                        <Text color="fg.muted">
-                          <Markdown>{item.detail}</Markdown>
-                        </Text>
-                      </HStack>
-                    ))}
-                  </Stack>
-                </Card.Body>
-                <Card.Footer />
-              </Card.Root>
-            )}
-            <Card.Root my={4} className={'bg-white'}>
-              <Card.Body gap="2">
-                <Card.Title>🗒️ Notes</Card.Title>
-                <Box className={'my-4'}>
-                  <Text color="fg.muted">
-                    <Markdown>{responseJson.notes}</Markdown>
-                  </Text>
-                </Box>
-              </Card.Body>
-              <Card.Footer />
-            </Card.Root>
-            <Card.Root my={4} className={'bg-white'}>
-              <Card.Body gap="2">
-                <Card.Title>
-                  ✏️ Full Prompt{' '}
-                  <Tooltip content={'Copy to clipboard'}>
-                    <Button onClick={handleCopyToClipboard} ml={2}>
-                      <FaClipboard />
-                    </Button>
-                  </Tooltip>
-                </Card.Title>
-                <Box fontSize="sm" display="flex" alignItems="flex-start">
-                  <code>{fullPrompt}</code>
-                </Box>
-              </Card.Body>
-            </Card.Root>
-          </>
-        )}
+        <Responses
+          data={data}
+          isLoading={isLoading}
+          error={error}
+          onCopyPrompt={handleCopyToClipboard}
+        />
       </Container>
     </>
   )

@@ -37,6 +37,7 @@ export interface RequestBody {
   location: string
   purpose: Purpose
   userPersona: UserPersona
+  actualBGL?: number
 }
 
 const fetchWeather = async (location: string) => {
@@ -76,7 +77,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     return res.status(405).json({ message: 'Method not allowed' })
   }
 
-  const { prompt, location, purpose, userPersona }: RequestBody = req.body
+  const { prompt, location, purpose, userPersona, actualBGL }: RequestBody =
+    req.body
   if (!prompt || !location || !purpose || !userPersona) {
     return res.status(400).json({
       message: 'Prompt, location, purpose, and userPersona are required',
@@ -105,6 +107,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     ${readingsContext}.
 
     **Context:**
+    ${actualBGL ? `**Current blood test BGL:** ${actualBGL} mmol/L.` : ''}
     **Location:** ${location}.\n
     ${weatherContext}.\n
     **ISF:** ${process.env.INSULIN_SENSITIVITY_FACTOR}.\n
@@ -115,7 +118,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     **Response Schema:**
     ${JSON.stringify(responseSchemas[purpose], null, 2)}
-
+    
     **Return in JSON format as per the above Response Schema**`
 
     const openai = new OpenAI({
