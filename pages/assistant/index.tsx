@@ -80,13 +80,21 @@ async function fetchResponse(
   purpose: string,
   userPersona: string,
   actualBGL?: number,
+  activeInsulinUnits?: number,
 ): Promise<ResponseData> {
   const res = await fetch('/api/ask', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ prompt, location, purpose, userPersona, actualBGL }),
+    body: JSON.stringify({
+      prompt,
+      location,
+      purpose,
+      userPersona,
+      actualBGL,
+      activeInsulinUnits,
+    }),
     signal: AbortSignal.timeout(30 * 1000),
   })
   if (!res.ok) {
@@ -114,6 +122,7 @@ export default function Assistant() {
   const [detectedLocation, setDetectedLocation] = useState('')
   const [detectedLocationName, setDetectedLocationName] = useState('')
 
+  const [activeInsulinUnits, setActiveInsulinUnits] = useState<number>()
   const [actualBglReading, setActualBglReading] = useState<number>()
 
   const [fullPrompt, setFullPrompt] = useState('')
@@ -176,6 +185,7 @@ export default function Assistant() {
         purpose,
         userPersona,
         actualBglReading || undefined,
+        activeInsulinUnits || undefined,
       )
       setError(null)
       setData(res)
@@ -204,7 +214,8 @@ export default function Assistant() {
           loc,
           purpose,
           userPersona,
-          actualBglReading,
+          actualBglReading || undefined,
+          activeInsulinUnits || undefined,
         )
         setData(res)
       } catch (error) {
@@ -292,6 +303,23 @@ export default function Assistant() {
                   Detected: {detectedLocationName} ({detectedLocation})
                 </Text>
               )}
+            </Fieldset.Root>
+          </Box>
+          <Box mb={4}>
+            <Fieldset.Root>
+              <Fieldset.Legend>
+                <strong>Active insulin units:</strong>
+              </Fieldset.Legend>
+              <Input
+                type="number"
+                step="0.1"
+                value={activeInsulinUnits ?? ''}
+                onChange={(e) => {
+                  const val = e.target.value
+                  setActiveInsulinUnits(val ? parseFloat(val) : undefined)
+                }}
+                placeholder="e.g. 1.3"
+              />
             </Fieldset.Root>
           </Box>
           <Box mb={4}>

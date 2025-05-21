@@ -37,6 +37,7 @@ export interface RequestBody {
   location: string
   purpose: Purpose
   userPersona: UserPersona
+  activeInsulinUnits?: number
   actualBGL?: number
 }
 
@@ -77,8 +78,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     return res.status(405).json({ message: 'Method not allowed' })
   }
 
-  const { prompt, location, purpose, userPersona, actualBGL }: RequestBody =
-    req.body
+  const {
+    prompt,
+    location,
+    purpose,
+    userPersona,
+    actualBGL,
+    activeInsulinUnits,
+  }: RequestBody = req.body
   if (!prompt || !location || !purpose || !userPersona) {
     return res.status(400).json({
       message: 'Prompt, location, purpose, and userPersona are required',
@@ -108,6 +115,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     **Context:**
     ${actualBGL ? `**Current blood test BGL:** ${actualBGL} mmol/L.` : ''}
+    ${activeInsulinUnits ? `**Current active insulin:** ${activeInsulinUnits} units.` : ''}
     **Location:** ${location}.\n
     ${weatherContext}.\n
     **ISF:** ${process.env.INSULIN_SENSITIVITY_FACTOR}.\n
