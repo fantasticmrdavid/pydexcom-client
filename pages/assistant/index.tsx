@@ -95,7 +95,7 @@ async function fetchResponse(
       actualBGL,
       activeInsulinUnits,
     }),
-    signal: AbortSignal.timeout(30 * 1000),
+    signal: AbortSignal.timeout(90 * 1000),
   })
   if (!res.ok) {
     const errorData = await res.json()
